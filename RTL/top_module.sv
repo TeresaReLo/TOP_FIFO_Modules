@@ -19,10 +19,10 @@ module top_module (
     fifo fifo_inst (
         .clk(clk),
         .rst(rst),
-        .writeEn(writeEn),
-        .writeData(writeData),
-        .readEn(readEn),
-        .readData(readData),
+        .write_en(writeEn),
+        .write_data(writeData),
+        .read_en(readEn),
+        .read_data(readData),
         .full(full),
         .empty(empty)
     );
