@@ -1,9 +1,8 @@
-`include "spi_defines.svh"
 
 module fifo #(
-    parameter DATA_WIDTH = `DATA_WIDTH,
-    parameter DEPTH = `DEPTH,
-    parameter PTR_WIDTH = `PTR_WIDTH
+    parameter DATA_WIDTH = 32,
+    parameter DEPTH = 8,
+    parameter PTR_WIDTH = $clog2(DEPTH)
     ) (
   	input  logic                  clk,
   	input  logic                  rst,

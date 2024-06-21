@@ -1,9 +1,8 @@
-`include "spi_defines.svh"
 
 module spi_serializer #(
-    parameter DATAWIDTH = `DATA_WIDTH,
-    parameter BITCOUNTERWIDTH = `BIT_COUNTER_WIDTH
-) (
+    parameter DATAWIDTH = 32,
+    parameter BITCOUNTERWIDTH =  $clog2(DATAWIDTH)) 
+    (
     input  logic                 clk,
     input  logic                 rst,
     input  logic                 full,
