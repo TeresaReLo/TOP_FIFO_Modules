@@ -9,6 +9,7 @@ module spi_serializer #(
     input  logic                 empty,
     input  logic [DATAWIDTH-1:0] read_data,
     output logic                 sclk,
+    output logic                 read_en,
     output logic                 mosi,
     output logic                 done
 );
@@ -46,15 +47,18 @@ module spi_serializer #(
   
  
 	always_ff @(posedge clk or posedge rst) begin
-      		if (rst || empty) begin
+      	        
+                if (rst || empty) begin
         		state <= IDLE;
         		shift_reg <= '0;
         		bit_counter <= '0;
         		done <= 1'b0;
             		mosi <= 1'b0;
             		sclk_enable <= 1'b0;
+                        read_en <= 1'b0;
         	end else begin
             	state <= next_state;
+                read_en <= 1'b0;
             	case (state)
               	IDLE: begin
 			shift_reg <= '0;
@@ -65,6 +69,7 @@ module spi_serializer #(
                 end
                 LOAD: begin
                     shift_reg <= read_data;
+                    read_en <= 1'b1;
                     bit_counter <= DATAWIDTH;
                     sclk_enable <= 1'b1;  // Enable sclk during SHIFT state
                 end

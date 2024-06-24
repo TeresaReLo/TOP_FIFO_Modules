@@ -14,7 +14,7 @@ module top_module (
     // Internal signals
     logic [(`DATA_WIDTH-1):0] read_data;
     logic full, empty;
-    logic readEn;
+    logic read_en;
     logic write_en;
     logic signed  [`DATA_WIDTH-1 : 0]  data_gen;
 
@@ -27,7 +27,7 @@ module top_module (
         .rst(rst),
         .write_en(write_en),
         .write_data(data_gen),
-        .read_en(readEn),
+        .read_en(read_en),
         .read_data(read_data),
         .full(full),
         .empty(empty)
@@ -44,12 +44,13 @@ module top_module (
         .empty(empty),
         .read_data(read_data),
         .sclk(sclk),
+        .read_en(read_en),
         .mosi(mosi),
         .done(done)
     );
 
     // Control read enable signal
-    assign readEn = (full || !empty) && !done;   
+    //assign readEn = (full || !empty) && !done;   
 
     //Instance function generator
     funct_generator#(
