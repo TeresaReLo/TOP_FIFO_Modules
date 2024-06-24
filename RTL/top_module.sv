@@ -12,7 +12,7 @@ module top_module (
 );
 
     // Internal signals
-    logic [(`DATA_WIDTH-1):0] readData;
+    logic [(`DATA_WIDTH-1):0] read_data;
     logic full, empty;
     logic readEn;
     logic write_en;
@@ -28,7 +28,7 @@ module top_module (
         .write_en(write_en),
         .write_data(data_gen),
         .read_en(readEn),
-        .read_data(readData),
+        .read_data(read_data),
         .full(full),
         .empty(empty)
     );
@@ -42,7 +42,7 @@ module top_module (
         .rst(rst),
         .full(full),
         .empty(empty),
-        .readData(readData),
+        .read_data(read_data),
         .sclk(sclk),
         .mosi(mosi),
         .done(done)
