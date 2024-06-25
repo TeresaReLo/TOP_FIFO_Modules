@@ -69,12 +69,12 @@ module spi_serializer #(
                 end
                 LOAD: begin
                     shift_reg <= read_data;
-                    read_en <= 1'b1;
+                    read_en <= 1'b1;   
                     bit_counter <= DATAWIDTH;
                     sclk_enable <= 1'b1;  // Enable sclk during SHIFT state
                 end
                 SHIFT: begin
-                    if (sclk && clk_div) begin  // Shift data on the positive edge of sclk
+                    if (sclk && clk_div) begin  // Shift data on the negative edge of sclk
 			mosi <= shift_reg[DATAWIDTH-1];
                         shift_reg <= shift_reg << 1; //1 Shift Left
                         bit_counter <= bit_counter - 1;
