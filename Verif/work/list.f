@@ -12,4 +12,5 @@
     ../../RTL/top_module.sv
 
 #verification
+    ../formal/fv_spi.sv
     ../tb/tb.sv

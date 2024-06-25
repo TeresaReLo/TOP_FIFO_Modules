@@ -36,9 +36,9 @@ typedef enum logic [1:0] {IDLE, CONFI, GEN, XX='x} state_t; //For FSM states
  state_t next;
 
  //(1)State register
- always_ff@(posedge clk or negedge rst)
+ always_ff@(posedge clk or posedge rst)
      if(rst) state <= IDLE;                                            
-     else      state <= next;
+        else state <= next;
 
  //(2)Combinational next state logic
  always_comb begin
@@ -54,7 +54,7 @@ typedef enum logic [1:0] {IDLE, CONFI, GEN, XX='x} state_t; //For FSM states
 
         CONFI: if(enh_conf_i)   next = CONFI; 
             else if(!en_low_i)  next = GEN;
-             else               next = IDLE; 
+            else                next = IDLE; 
 					
         default:            next = XX;
      endcase
