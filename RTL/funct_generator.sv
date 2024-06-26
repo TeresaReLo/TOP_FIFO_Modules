@@ -164,7 +164,7 @@ funct_generator_register #(
 addr_reg(
     .clk	(clk	    ),
     .rst	(rst	    ),
-    .clrh	(1'b0       ),
+    .clrh	(enh_config_fsm),
     .enh	(enh_gen_fsm ),
     .d  	(addr_temp  ),
     .q	        (addr       )	

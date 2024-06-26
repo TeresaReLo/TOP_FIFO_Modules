@@ -3,6 +3,9 @@
 
 
 package fifo_defines_pkg;
+
+    `define TRUE 1'b1
+
 // FIFO Parameters
     `define DATA_WIDTH   6'h20
     `define DEPTH        9'h100
@@ -20,7 +23,7 @@ package fifo_defines_pkg;
     `define SIN_FILE      "/home/agodoy/Documents/DV/TOP_FIFO_Modules/RTL/sin.txt"
     `define TRIAN_FILE    "/home/agodoy/Documents/DV/TOP_FIFO_Modules/RTL/triangular.txt"
     `define SQUA_FILE     "/home/agodoy/Documents/DV/TOP_FIFO_Modules/RTL/square.txt"
-
+    
 //`endif // SPI_DEFINES_SVH
 
 endpackage
