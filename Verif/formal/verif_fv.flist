@@ -1,1 +1,3 @@
+./fv_spi.sv
 ./fv_fifo.sv
+./fv_top_module.sv
