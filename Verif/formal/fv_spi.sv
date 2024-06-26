@@ -33,7 +33,13 @@ module fv_spi(
 
     typedef enum logic [1:0] {IDLE, LOAD, SHIFT, COMPLETE} state_type;
     state_type state_fv, next_state_fv;
-    
+    bit flag_t1;
+
+    always_ff @(posedge clk, posedge rst)begin
+        if(rst) flag_t1 <= 1'b0;  
+        else flag_t1 <= 1'b1;
+    end
+
     ///// Para utilizar los nombres de los estados en las aserciones unicamente ///////////////
     always_comb begin
         case(state) 
@@ -67,101 +73,136 @@ module fv_spi(
     // 1) Empty input must reset all the internal singals at the next clk posedge
     empty_reset_assert : assert property (@(posedge clk) disable iff (rst) (empty) |=> ( (shift_reg == '0) && (bit_counter == '0) && (sclk_enable == 1'b1) && (clk_div == 1'b1) && (state_fv == IDLE)));
         //$info("Empty reset assertiion passed");
-        //else $error("empty reset assertion faild at time %t", $time);
+        //else $error("empty reset assertion failed at time %t", $time);
 
     // 2) Done output must be activated two clock cycles after bit counter is equal to zero 
     done_after_bitcounter_zero_assert : assert property (@(posedge clk) disable iff (rst) ((bit_counter == '0) && (state_fv == SHIFT)) |-> ##2 (done));
         //$info("Done after bit counter = 0 assertiion passed");
-        //else $error("Done after bit counter = 0 assertion faild at time %t", $time);
+        //else $error("Done after bit counter = 0 assertion failed at time %t", $time);
 
     // 3) Done output must to be activated one cycle after the COMPLETE state 
-    done_after_complete_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == COMPLETE) |=> (done));
+    complete_state_then_done_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == COMPLETE) |=> (done));
         //$info("Done after complete assertiion passed");
-        //else $error("Done after complete assertion faild at time %t", $time);
+        //else $error("Done after complete assertion failed at time %t", $time);
+    
+    // 4) If done is activated, the state one clock cycle before must have been COMPLETE
+    done_only_after_load_assert : assert property (@(posedge clk) disable iff (rst) (done) |-> (($past(state_fv)) == COMPLETE));
+        //$info("Done after complete assertiion passed");
+        //else $error("Done after complete assertion failed at time %t", $time);
 
-    // 4) Done output must remain assert for only 1 clock cycle since must be activated in the COMPLETE state and this state returns to IDLE in the next cycle without any condition.
+    // 5) Done output must remain assert for only 1 clock cycle since must be activated in the COMPLETE state and this state returns to IDLE in the next cycle without any condition.
     done_only_one_cycle_assert : assert property (@(posedge clk) disable iff (rst) (done) |=> (!done));
         //$info("Done only one cycle assertiion passed");
-        //else $error("Done only one cycle assertion faild at time %t", $time);
+        //else $error("Done only one cycle assertion failed at time %t", $time);
 
-    // 5) 
+    // 6) IDLE state can only change to LOAD state or remain in IDLE state 
     state_after_idle_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == IDLE) |=> ( (state_fv == IDLE) || (state_fv == LOAD) ));
         //$info("State after IDLE assertiion passed");
-        //else $error("State after IDLE assertion faild at time %t", $time);
+        //else $error("State after IDLE assertion failed at time %t", $time);
 
-    // 6) 
+    // 7) This property verifies that next_state signal have the correct value in the IDLE state
     next_state_idle_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == IDLE) |-> ( (next_state_fv == IDLE) || (next_state_fv == LOAD) ));
         //$info("Next state IDLE assertiion passed");
-        //else $error("Next state IDLE assertion faild at time %t", $time);
+        //else $error("Next state IDLE assertion failed at time %t", $time);
 
-    // 7) 
-    state_after_load_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |=> ( (state_fv == LOAD) || (state_fv == SHIFT) ));
+    // 8) LOAD state must only last for one clock cycle and must always go to the SHIFT state.
+    state_after_load_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |=> (state_fv == SHIFT));
         //$info("State after LOAD assertiion passed");
-        //else $error("State after LOAD assertion faild at time %t", $time);
+        //else $error("State after LOAD assertion failed at time %t", $time);
 
-    // 8) 
-    next_state_load_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |-> ( (next_state_fv == LOAD) || (next_state_fv == SHIFT) ));
+    // 9) This property verifies that next_state signal have the correct value in the LOAD state
+    next_state_load_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |-> (next_state_fv == SHIFT));
         //$info("Next state LOAD assertiion passed");
-        //else $error("Next state LOAD assertion faild at time %t", $time);
+        //else $error("Next state LOAD assertion failed at time %t", $time);
 
-    // 9) 
+    // 10) SHIFT state can only change to COMPLETE state or remain in SHIFT state 
     state_after_shift_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == SHIFT) |=> ( (state_fv == SHIFT) || (state_fv == COMPLETE) ));
         //$info("State after SHIFT assertiion passed");
-        //else $error("State after SHIFT assertion faild at time %t", $time);
+        //else $error("State after SHIFT assertion failed at time %t", $time);
 
-    // 10) 
+    // 11) This property verifies that next_state signal have the correct value in the SHIFT state
     next_state_shift_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == SHIFT) |-> ( (next_state_fv == SHIFT) || (next_state_fv == COMPLETE) ));
         //$info("Next state SHIFT assertiion passed");
-        //else $error("Next state SHIFT assertion faild at time %t", $time);
+        //else $error("Next state SHIFT assertion failed at time %t", $time);
 
-    // 11) 
+    // 12) COMPLETE state must only last for one clock cycle and must always go to the IDLE state
     state_after_complete_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == COMPLETE) |=> (state_fv == IDLE) );
         //$info("State after COMPLETE assertiion passed");
-        //else $error("State after COMPLETE assertion faild at time %t", $time);
+        //else $error("State after COMPLETE assertion failed at time %t", $time);
 
-    // 12) 
+    // 13) This property verifies that next_state signal have the correct value in the COMPLETE state
     next_state_complete_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == COMPLETE) |->  (next_state_fv == IDLE) );
         //$info("Next state COMPLETE assertiion passed");
-        //else $error("Next state COMPLETE assertion faild at time %t", $time);
+        //else $error("Next state COMPLETE assertion failed at time %t", $time);
 
-    // 13) 
+    // 14) When the state change condition is met, the state goes from IDLE to LOAD
     state_idle_next_condition_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == IDLE) && (full || (!empty)) && (!done)) |=> (state_fv == LOAD) );
         //$info("State IDLE to LOAD assertiion passed");
-        //else $error("State IDLE to LOAD assertion faild at time %t", $time);
+        //else $error("State IDLE to LOAD assertion failed at time %t", $time);
 
-    // 14) 
+    // 15) When the state change condition is met, the state goes from SHIFT to COMPLETE
     state_shift_next_condition_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == SHIFT) && (bit_counter == '0)) |=> (state_fv == COMPLETE) );
         //$info("State SHIFT to COMPLETE assertiion passed");
-        //else $error("State SHIFT to COMPLETE assertion faild at time %t", $time);
-
-    // 15) read_en output should be active only by LOAD state
-    read_en_only_after_load_assert : assert property (@(posedge clk) disable iff (rst) (read_en) |-> ($past(state_fv) == LOAD) );
-        //$info("read_en after LOAD assertiion passed");
-        //else $error("read_en after LOAD assertion faild at time %t", $time);
-
-    // 16) read_en output must remain assert for only 1 clock cycle since must be activated in the LOAD state and this state go to SHIFT in the next cycle without any condition.
-    read_en_only_one_cycle_assert : assert property (@(posedge clk) disable iff (rst) (read_en) |=> (!read_en));
-        //$info("read_en only one cycle assertiion passed");
-        //else $error("read_en only one cycle assertion faild at time %t", $time);
-
-    // 17)
+        //else $error("State SHIFT to COMPLETE assertion failed at time %t", $time);
+    
+    // 16) read_en must be asserted one clock cycle after LOAD state 
     load_state_then_read_en_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |=> (read_en) );
         //$info("load_state_then_read_en assertiion passed");
-        //else $error("load_state_then_read_en assertion faild at time %t", $time);
+        //else $error("load_state_then_read_en assertion failed at time %t", $time);
 
-    // 18)
-    sclk_enable_shift_state_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == SHIFT) |-> (sclk_enable) );
-        //$info("sclk_enable_shift_state assertiion passed");
-        //else $error("sclk_enable_shift_state assertion faild at time %t", $time);
-    
-    // 19) 
-    shift_reg_load_read_data_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |=> (shift_reg == read_data) );
+    // 17) If read_en is activated, the state one clock cycle before must have been LOAD
+    read_en_only_after_load_assert : assert property (@(posedge clk) disable iff (rst) (read_en) |-> (($past(state_fv)) == LOAD) );
+        //$info("read_en after LOAD assertiion passed");
+        //else $error("read_en after LOAD assertion failed at time %t", $time);
+
+    // 18) read_en output must remain assert for only 1 clock cycle since must be activated in the LOAD state and this state go to SHIFT in the next cycle without any condition.
+    read_en_only_one_cycle_assert : assert property (@(posedge clk) disable iff (rst) (read_en) |=> (!read_en));
+        //$info("read_en only one cycle assertiion passed");
+        //else $error("read_en only one cycle assertion failed at time %t", $time);
+
+    // 19) The value of read_data should be assing to shift_reg in the LOAD state
+     shift_reg_load_read_data_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |=> (shift_reg == read_data) );
         //$info("shift_reg_load_read_data_assert assertiion passed");
-        //else $error("shift_reg_load_read_data_assert assertion faild at time %t", $time);
+        //else $error("shift_reg_load_read_data_assert assertion failed at time %t", $time);
+
+    // 20) sclk_enable must be asserted one clock cycle after SHIFT state  
+    shift_state_sclk_enable_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == SHIFT) |-> (sclk_enable) );
+        //$info("sclk_enable_shift_state assertiion passed");
+        //else $error("sclk_enable_shift_state assertion failed at time %t", $time);
+
+    // 21) If sclk_enable is activated, the state one clock cycle before must have been SHIFT
+    sclk_enable_only_shift_assert : assert property (@(posedge clk) disable iff (rst) (sclk_enable) |-> (state_fv == SHIFT));
+        //$info("sclk_enable_shift_state assertiion passed");
+        //else $error("sclk_enable_shift_state assertion failed at time %t", $time);
+
+    // 22) If sclk_enable is low, sclk must be stable
+    sclk_enableoff_sclk_stable_assert : assert property (@(posedge clk) disable iff (rst) (!sclk_enable) |=> ($stable(sclk))); 
+        //$info("sclk_enableoff_sclk_stable assertiion passed");
+        //else $error("sclk_enableoff_sclk_stable assertion failed at time %t", $time);
+
+    // 23) clk_div must to toggle every clock cycle 
+    clk_div_toggle_assert : assert property (@(posedge clk) disable iff (rst) (`TRUE) |=> ($changed(clk_div)));
+        //$info("clk_div toggle assertion passed");
+        //else $error("clk_div toggle assertion failed at time %t", $time);
+
+    // 24) sclk must to toggle when sclk_enable=1 and negedge of clk_div 
+    sclk_toggle_enable_assert : assert property (@(posedge clk) disable iff (rst) ((sclk_enable) && ($fell(clk_div))) |-> ##2 ($changed(sclk)));
+        //$info("sclk_toggle_enable assertion passed");
+        //else $error("sclk_toggle_enable assertion failed at time %t", $time);
+
+    // 25) bit_counter must decrement by 1 in the SHIFT state when a negedge sclk ocurrs
+    bit_counter_decrement_shift_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == SHIFT) && ($fell(sclk))) |->  (bit_counter == (($past(bit_counter)) - 1'b1)));
+        //$info("bit_counter_decrement_shift assertion passed");
+        //else $error("bit_counter_decrement_shift assertion failed at time %t", $time);
+
+    // 25) bit_counter must decrement by 1 in the SHIFT state when a negedge sclk ocurrs
+    mosi_bit_shift_reg_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == SHIFT) && ($fell(sclk)) && (bit_counter == '0)) |-> ##4 (mosi == shift_reg[`DATA_WIDTH-1]));
+        //$info("mosi_bit_shift_reg assertion passed");
+        //else $error("mosi_bit_shift_reg assertion failed at time %t", $time);
 
     /*************************************************************************** cover ***************************************************************************/
     
-    // 1) Done flag was assert 
+    // 1) Done flag was asserted
     done_flag_cover : cover property (@(posedge clk) (done));
     
     // 2) IDLE state ocurred
@@ -176,9 +217,11 @@ module fv_spi(
     // 5) COMPLETE state ocurred
     state_COMPLETE_cover : cover property (@(posedge clk) (state_fv == COMPLETE));
 
-    // 6) read_em was assert 
+    // 6) read_em was asserted 
     read_en_cover : cover property (@(posedge clk) (read_en));
 
+    // 7) sclk_enable was asserted
+    sclk_enable_cover : cover property (@(posedge clk) (sclk_enable));
 endmodule
 
 bind spi_serializer fv_spi fv_spi_inst(.*); 
