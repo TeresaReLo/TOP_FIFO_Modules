@@ -39,7 +39,10 @@ module fv_generator(
   
 
 ///////////////////////////////////////////////////////////////////////////// Assumptionss//////////////////////
-   
+
+	// 1) Assume enable and clear signals are not active simultaneously.
+	enh_and_clrh_notactive_same: assume property (@(posedge clk) disable iff (rst) !(enh && clrh));
+
 ///////////////////////////////////////////////////////////////////////////// Assertions //////////////////////
 
 	// 1) The property assures that when clrh is high, the output data_o is set to zero.
@@ -59,20 +62,23 @@ module fv_generator(
 	$info("Assetion pass addr_increment1_when_enh"); else $error(" Asserion fail addr_increment1_when_enh");
 
 
-/*************************************************************************** cover ***************************************************************************/
+///////////////////////////////////////////////////////////////////////////// Covers //////////////////////
    	
 	// 1) Cover that is data_o is 0 when clrh is asserted.
 	clrh_clears_output: cover property (@(posedge clk) disable iff (rst) (clrh && (data_o == 0)));
 	
-	// 2)Cover the scenario where enh is asserted and the adder performs the addition operation.
+	// 2) Cover the scenario where enh is asserted and the adder performs the addition operation.
 	enh_add_operation: cover property (@(posedge clk) disable iff (rst) (enh && !clrh && (data_o == data_a_i + data_b_i + data_c_i)));
 
+	// 3) Cover the scenario where enh is high, clrh is low, and addr_temp is addr + 1. 
+	next_address_is_addr_plus_1: cover property (@(posedge clk) disable iff (rst) (enh && !clrh && (addr_temp == addr + 1)));
 
-	
   
 endmodule
 
 bind funct_generator fv_generator fv_generator_inst(.*); 
+
+
 
 
 
