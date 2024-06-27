@@ -3,27 +3,23 @@ import fifo_defines_pkg::*;
 
 module fv_generator(
 
-	input  logic 				                clk,
-	input  logic 				                rst,
-	input  logic 				                en_low_i, 
-	input  logic 				                enh_conf_i, 
-        input  logic signed  [INT_BITS-1 : 0]	                amp_i,  
-	input  logic	     [1:0]	                        sel_i,
-	input logic                                            wr_en_o,
-	input logic signed  [DATA_WIDTH-1 : 0]   data_o,
-	logic        [LUT_ADDR-1:0] addr, addr_temp,
-	logic        [DATA_WIDTH-1 : 0]	amp_reg,
-	logic signed [DATA_WIDTH-1 : 0] cos_temp,
-	logic signed [DATA_WIDTH-1 : 0] sin_temp,
-	logic signed [DATA_WIDTH-1 : 0] trian_temp,
-	logic signed [DATA_WIDTH-1 : 0] squa_temp,
-	logic signed [DATA_WIDTH-1 : 0] data_select,
-	logic signed [(DATA_WIDTH*2)-1:0] data_temp,
-	bit enh_config_fsm,	
-	bit clrh_addr_fsm,
-	bit enh_gen_fsm,
-	bit en_config_amp 
-
+input  logic                     clk,
+    input  logic                     rst,
+    input  logic                     clrh_addr_fsm,
+    input  logic                     enh_config_fsm,
+    input  logic                     enh_gen_fsm,
+    input  logic [DATA_WIDTH-1:0]    amp_reg,
+    input  logic signed [INT_BITS-1:0] amp_i,
+    input  logic [1:0]               sel_i,
+    input  logic [DATA_WIDTH-1:0]    data_select,
+    input  logic signed [DATA_WIDTH-1:0] cos_temp,
+    input  logic signed [DATA_WIDTH-1:0] sin_temp,
+    input  logic signed [DATA_WIDTH-1:0] trian_temp,
+    input  logic signed [DATA_WIDTH-1:0] squa_temp,
+    input  logic signed [(DATA_WIDTH*2)-1:0] data_temp,
+    input  logic [DATA_WIDTH-1:0]    addr,
+    input  logic [DATA_WIDTH-1:0]    addr_temp,
+    input  logic signed [DATA_WIDTH-1:0] read_data_o
      );
 
     	typedef enum logic  [1:0] {IDLE, CONFI, GEN, XX='x} state_t;
@@ -36,7 +32,6 @@ module fv_generator(
         	else flag <= 1'b1;
     	end
 
-  
 
 ///////////////////////////////////////////////////////////////////////////// Assumptionss//////////////////////
 
@@ -58,10 +53,10 @@ module fv_generator(
 	$info("Assetion pass data_o_stability_when_disabled"); else $error(" Asserion fail data_o_stability_when_disabled");
 	
 	// 4) The property assures that the adder adds 1 to the current addess to produce the next addess when enh is high.
-	addr_increment1_when_enh: assert property (@(posedge clk) disable iff (rst) (enh && !clrh) |-> (addr_temp == addr + 1))
+	addr_increment1_when_enh: assert property (@(posedge clk) disable iff (rst) (enh_gen_fsm && !clrh_addr_fsm) |-> (addr_temp == addr + 1))
 	$info("Assetion pass addr_increment1_when_enh"); else $error(" Asserion fail addr_increment1_when_enh");
 
-
+ 
 ///////////////////////////////////////////////////////////////////////////// Covers //////////////////////
    	
 	// 1) Cover that is data_o is 0 when clrh is asserted.
