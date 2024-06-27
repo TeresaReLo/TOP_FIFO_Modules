@@ -45,12 +45,15 @@ module fv_generator(
 	// 1) The property assures that when clrh is high, the output data_o is set to zero.
 	clrh_on_data_o_zero: assert property (@(posedge clk) disable iff (rst) (clrh) |=> (data_o == 0)) $info("Assetion pass clrh_on_data_o_zero");
 	else $error(" Asserion fail clrh_on_data_o_zero");
+	
 	// 2) The property assures that when enh is 1 and clrh is 0 data_o is the sum of data_a_i, data_b_i, and data_c_i.
 	enh_on_data_o_increment: assert property (@(posedge clk) disable iff (rst) (enh && !clrh) |=> (data_o == data_a_i + data_b_i + data_c_i))
 	$info("Assetion pass enh_on_data_o_increment"); else $error(" Asserion fail enh_on_data_o_increment");
+	
 	// 3) The property assures that when enh is low and clrh is low, the output data_o remains unchanged.
 	data_o_stability_when_disabled: assert property (@(posedge clk) disable iff (rst) (!enh && !clrh) |=> (data_o == $past(data_o)))
 	$info("Assetion pass data_o_stability_when_disabled:"); else $error(" Asserion fail data_o_stability_when_disabled:");
+	
 	// 4) The property assures that the adder adds 1 to the current addess to produce the next addess when enh is high.
 	a_next_address_is_addr_plus_1: assert property (@(posedge clk) disable iff (rst) (enh && !clrh) |=> (addr_temp == addr + 1));
 
