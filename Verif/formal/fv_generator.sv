@@ -9,9 +9,8 @@ module fv_generator(
 	input  logic 				                enh_conf_i, 
         input  logic signed  [INT_BITS-1 : 0]	                amp_i,  
 	input  logic	     [1:0]	                        sel_i,
-	//OUTPUTS
-	output logic                                            wr_en_o,
-	output logic signed  [DATA_WIDTH-1 : 0]   data_o,
+	input logic                                            wr_en_o,
+	input logic signed  [DATA_WIDTH-1 : 0]   data_o,
 	logic        [LUT_ADDR-1:0] addr, addr_temp,
 	logic        [DATA_WIDTH-1 : 0]	amp_reg,
 	logic signed [DATA_WIDTH-1 : 0] cos_temp,
