@@ -22,6 +22,8 @@ module fv_generator(
 		bit clrh_addr_fsm,
 		bit enh_gen_fsm,
 		bit en_config_amp
+		logic [1:0] state,
+    		logic [1:0] next_state
      );
 
     	typedef enum logic  [1:0] {IDLE, CONFI, GEN, XX='x} state_t;
@@ -34,13 +36,14 @@ module fv_generator(
         	else flag <= 1'b1;
     	end
 
+// ************************************************ funct_generator_adder *************************************/
 
-///////////////////////////////////////////////////////////////////////////// Assumptionss//////////////////////
+///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
 	// 1) Assume enable and clear signals are not active simultaneously.
 	enh_and_clrh_notactive_same: assume property (@(posedge clk) disable iff (rst) !(enh_gen_fsm && clrh_addr_fsm));
 
-///////////////////////////////////////////////////////////////////////////// Assertions //////////////////////
+///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
 	// 1) The property assures that when clrh is high, the output data_o is set to zero.
 	clrh_on_data_o_zero: assert property (@(posedge clk) disable iff (rst) (clrh_addr_fsm) |-> (addr_temp == 0)) $info("Assetion pass clrh_on_data_o_zero");
@@ -59,7 +62,7 @@ module fv_generator(
 	$info("Assetion pass addr_increment1_when_enh"); else $error(" Asserion fail addr_increment1_when_enh");
 
  
-///////////////////////////////////////////////////////////////////////////// Covers //////////////////////
+///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
    	
 	// 1) Cover that is data_o is 0 when clrh is asserted.
 	clrh_clears_output: cover property (@(posedge clk) disable iff (rst) (clrh_addr_fsm && (addr_temp == 0)));
@@ -70,7 +73,27 @@ module fv_generator(
 	// 3) Cover the scenario where enh is high, clrh is low, and addr_temp is addr + 1. 
 	next_address_is_addr_plus_1: cover property (@(posedge clk) disable iff (rst) (enh_gen_fsm && !clrh_addr_fsm && (addr_temp == addr + 1)));
 
-  
+
+// ************************************************ funct_generator_multi *************************************/
+
+///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
+
+	// 1) Assume enable and clear signals are not active simultaneously.
+	enh_and_clrh_notactive_same: assume property (@(posedge clk) disable iff (rst) !(enh_gen_fsm && clrh_addr_fsm));
+
+///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
+
+	// 1) The property assures that when clrh is high, the output data_o is set to zero.
+	clrh_on_data_o_zero: assert property (@(posedge clk) disable iff (rst) (clrh_addr_fsm) |-> (addr_temp == 0)) $info("Assetion pass clrh_on_data_o_zero");
+	else $error(" Asserion fail clrh_on_data_o_zero");
+
+ 
+///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
+   	
+	// 1) Cover that is data_o is 0 when clrh is asserted.
+	clrh_clears_output: cover property (@(posedge clk) disable iff (rst) (clrh_addr_fsm && (addr_temp == 0)));
+
+
 endmodule
 
 
