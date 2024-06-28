@@ -78,20 +78,22 @@ module fv_generator(
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
-	// 1) Assume enable and clear signals are not active simultaneously.
-	enh_and_clrh_notactive_same: assume property (@(posedge clk) disable iff (rst) !(enh_gen_fsm && clrh_addr_fsm));
+	// 1) Assume that the a_i is stable during the clock cycle.
+	assume property (@(posedge clk) disable iff (rst) $stable(data_select));
+	// 2) Assume that the b_i is stable during the clock cycle.
+	assume property (@(posedge clk) disable iff (rst) $stable(amp_reg));
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
-	// 1) The property assures that when clrh is high, the output data_o is set to zero.
-	clrh_on_data_o_zero: assert property (@(posedge clk) disable iff (rst) (clrh_addr_fsm) |-> (addr_temp == 0)) $info("Assetion pass clrh_on_data_o_zero");
+	// 1) The property assures multiplication operation.
+	multiplication_correct: assert property (@(posedge clk) disable iff (rst) (enh_gen_fsm) |-> (data_temp == (data_select * amp_reg))) $info("Assetion pass clrh_on_data_o_zero");
 	else $error(" Asserion fail clrh_on_data_o_zero");
 
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
    	
-	// 1) Cover that is data_o is 0 when clrh is asserted.
-	clrh_clears_output: cover property (@(posedge clk) disable iff (rst) (clrh_addr_fsm && (addr_temp == 0)));
+	// 1) Cover property for the multiplication scenario.
+	multi_cover: cover property (@(posedge clk) disable iff (rst) ((enh_gen_fsm) && (data_temp == (data_select * amp_reg))));
 
 
 endmodule
