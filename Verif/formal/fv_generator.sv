@@ -27,7 +27,7 @@ module fv_generator(
      );
 
     	typedef enum logic  [1:0] {IDLE, CONFI, GEN, XX='x} state_t;
-    	state_t state, next_state;
+    	state_t state_f, next_state_f;
     
 	bit flag;
 
@@ -35,6 +35,26 @@ module fv_generator(
         	if(rst) flag <= 1'b0;  
         	else flag <= 1'b1;
     	end
+
+
+ ///// Para utilizar los nombres de los estados en las aserciones ///////////////
+    always_comb begin
+        case(state) 
+            0: state = IDLE;
+            1: state = CONFI;
+            2: state = GEN;
+            3: state = XX;
+        endcase
+    end
+
+    always_comb begin
+        case(next_state) 
+          	0: next_state = IDLE;
+            1: next_state = CONFI;
+            2: next_state = GEN;
+            3: next_state = XX;
+        endcase
+    end
 
 // ************************************************ funct_generator_adder *************************************/
 
@@ -95,11 +115,59 @@ module fv_generator(
 	// 1) Cover property for the multiplication scenario.
 	multi_cover: cover property (@(posedge clk) disable iff (rst) ((enh_gen_fsm) && (data_temp == (data_select * amp_reg))));
 
+// ************************************************ funct_generator_fsm *************************************/
+///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
+
+	// 1)
+
+
+///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
+
+	// 1) This property assures state transition from IDLE to CONFIG when enh_conf_i is asserted.
+	whenidle_next_config: assert property (@(posedge clk) disable iff (rst) (state_f == IDLE && enh_conf_i) |-> (next_state_f == CONFI))  $info("Assetion pass whenidle_next_config");
+	else $error(" Asserion fail whenidle_next_config");
+	
+	// 2) This property assures state transition from IDLE to GEN when enh_conf_i and en_low_i are not active.
+	whenidle_next_gen: assert property (@(posedge clk) disable iff (rst) ((state_f == IDLE) && ((!enh_conf_i) && (!en_low_i))) |-> (next_state_f == GEN))  $info("Assetion pass whenidle_next_gen");
+	else $error(" Asserion fail whenidle_next_gen");
+	
+	// 3)	This property assures IDLE state is stable if  enh_conf_i and en_low_i are not asserted or if a rst is active.
+	idle_stable: assert property (@(posedge clk) disable iff (rst) ((state_f == IDLE) && (((!enh_conf_i) && en_low_i) || rst)) |-> (next_state_f == IDLE))  $info("Assetion pass idle_stable");
+	else $error(" Asserion fail idle_stable");
+
+	// 8) This property assures clrh_addr_fsm should be high in IDLE or CONFI states
+	clrh_addr_fsm_when_idle_or_confi: assert property (@(posedge clk) disable iff (rst) (state == IDLE || state == CONFI)) |-> clrh_addr_fsm $info("Assetion pass clrh_addr_fsm_when_idle_or_confi");
+	else $error(" Asserion fail clrh_addr_fsm_when_idle_or_confi");
+
+	// 9) This property assures enh_config_fsm should be high in CONFI state
+	 enh_config_fsm_active_when_confi: assert property (@(posedge clk) disable iff (rst) (state == CONFI) |-> enh_config_fsm) $info("Assetion pass  enh_config_fsm_active_when_confi");
+	else $error(" Asserion fail  enh_config_fsm_active_when_confi");
+
+	// 10) This property assures enh_gen_fsm should be high in GEN state
+	 enh_gen_fsm_active_when_gen: assert property (@(posedge clk) disable iff (rst) (state == GEN) |-> enh_gen_fsm) $info("Assetion pass  enh_gen_fsm_active_when_gen");
+	else $error(" Asserion fail  enh_gen_fsm_active_when_gen");
+
+
+
+
+ 
+///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
+   
+  	// 1) IDLE state ocurred
+    	state_idle_cover : cover property (@(posedge clk) (state_f == IDLE));
+
+    	// 2) CONFI state ocurred
+    	state_confi_cover : cover property (@(posedge clk) (state_f == CONFI;));
+
+   	 // 3) GEN state ocurred
+    	state_gen_cover : cover property (@(posedge clk) (state_f == GEN));
+
 
 endmodule
 
 
 bind funct_generator fv_generator fv_generator_inst(.*); 
+
 
 
 
