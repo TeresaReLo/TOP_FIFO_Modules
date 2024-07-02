@@ -227,7 +227,7 @@ module fv_funct_generator_adder (
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
 	// 1) Cover that is data_o is 0 when clrh is asserted.
- 	 clrh_clears_output: cover property (@(posedge clk) (clrh && data_o == 0));
+ 	 clrh_clears_output: cover property (@(posedge clk) (clrh && (data_o == 0)));
 	
 	// 2) Cover the scenario where enh is asserted and the adder performs the addition operation.
     	enh_add_operation: cover property (@(posedge clk) (enh && (!clrh) && (data_o == (data_a_i + data_b_i + data_c_i))));
