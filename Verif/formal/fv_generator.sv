@@ -251,14 +251,14 @@ module fv_funct_generator_multi (
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
 	// 1) The property assures multiplication operation.
-	//multiplication_correct: assert property (@(posedge clk) disable iff (rst) (enh) |-> (data_o == (a_i * b_i))) $info("Assetion pass clrh_on_data_o_zero");
-	//else $error(" Asserion fail clrh_on_data_o_zero");
+	multiplication_correct: assert property (@(posedge clk) (enh) |-> (data_o == (a_i * b_i))) $info("Assetion pass clrh_on_data_o_zero");
+	else $error(" Asserion fail clrh_on_data_o_zero");
 
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
    	
 	// 1) Cover property for the multiplication scenario.
-	multi_cover: cover property (@(posedge clk) disable iff (rst) ((enh_gen_fsm) && (data_o == (a_i * b_i))));
+	multi_cover: cover property (@(posedge clk) ((enh) && (data_o == (a_i * b_i))));
 
 endmodule
 
