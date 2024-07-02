@@ -202,7 +202,7 @@ module fv_funct_generator_adder (
 	input  logic [DATA_WIDTH-1:0]  	data_a_i,
 	input  logic [DATA_WIDTH-1:0]  	data_b_i,
 	input  logic [DATA_WIDTH-1:0] 	data_c_i,
-	input logic [DATA_WIDTH-1:0]  	data_o 
+	input  logic [DATA_WIDTH-1:0]  	data_o 
 );
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
@@ -251,8 +251,8 @@ module fv_funct_generator_multi (
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
 	// 1) The property assures multiplication operation.
-	multiplication_correct: assert property (@(posedge clk) (enh) |-> (data_o == (a_i * b_i))) $info("Assetion pass clrh_on_data_o_zero");
-	else $error(" Asserion fail clrh_on_data_o_zero");
+	multiplication_correct: assert property (@(posedge clk) (enh) |-> (data_o == (a_i * b_i))) $info("Assetion pass ");
+	else $error(" Asserion fail ");
 
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
@@ -262,13 +262,93 @@ module fv_funct_generator_multi (
 
 endmodule
 
+
+module fv_funct_generator_lut(
+		input  logic                  		clk,		
+		input  logic [ADDR_WIDTH-1:0] 		read_addr_i,
+		input logic signed [DATA_WIDTH-1 : 0] 	read_data_o,
+		reg [3:4-DATA_WIDTH] lut_structure [2**ADDR_WIDTH-1:0]
+);
+///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
+
+	// 1) .
+	//assume property (@(posedge clk) $stable(a_i));
+
+
+///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
+
+	// 1).
+	//multiplication_correct: assert property (@(posedge clk) (enh) |-> (data_o == (a_i * b_i))) $info("Assetion pass ");
+	//else $error(" Asserion fail ");
+
+ 
+///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
+	// 1).
+
+endmodule
+
+module fv_funct_generator_mux(
+	input  logic       [1:0] 	    	sel_i, 
+	input  logic                 	    	enh, 
+	input  logic signed[DATA_WIDTH-1 : 0] 	data_0_i,
+	input  logic signed[DATA_WIDTH-1 : 0] 	data_1_i,
+	input  logic signed[DATA_WIDTH-1 : 0] 	data_2_i,
+	input  logic signed[DATA_WIDTH-1 : 0] 	data_3_i,
+	input logic signed [DATA_WIDTH-1 : 0] 	data_o
+);
+///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
+
+	// 1) .
+	//assume property (@(posedge clk) $stable(a_i));
+
+
+///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
+
+	// 1).
+	//multiplication_correct: assert property (@(posedge clk) (enh) |-> (data_o == (a_i * b_i))) $info("Assetion pass ");
+	//else $error(" ");
+
+ 
+///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
+	// 1).
+
+endmodule
+
+
+module fv_funct_generator_register(
+	input  logic 		        clk,
+	input  logic 		        rst,
+	input  logic 		        clrh,
+	input  logic 		        enh,
+	input  logic [DATA_WIDTH - 1:0] d,
+	input logic [DATA_WIDTH - 1:0] 	q	
+);
+
+///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
+
+	// 1) .
+	//assume property (@(posedge clk) $stable(a_i));
+
+
+///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
+
+	// 1).
+	//multiplication_correct: assert property (@(posedge clk) (enh) |-> (data_o == (a_i * b_i))) $info("Assetion pass ");
+	//else $error(" Asserion fail ");
+
+ 
+///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
+	// 1).
+
+endmodule
+
 bind funct_generator fv_generator fv_generator_inst(.*); 
 bind funct_generator_adder fv_funct_generator_adder fv_generator_adder_inst(.*);
 bind funct_generator_fsm fv_funct_generator_fsm fv_generator_fsm_inst(.*);
 bind funct_generator_multi fv_funct_generator_multi fv_generator_multi_inst(.*);
-
-
-
+bind funct_generator_lut fv_funct_generator_lut fv_generator_lut_inst(.*);
+bind funct_generator_mux fv_funct_generator_mux fv_generator_mux_inst(.*);
+bind funct_generator_register fv_funct_generator_register fv_generator_register_inst(.*);
 
 
 
