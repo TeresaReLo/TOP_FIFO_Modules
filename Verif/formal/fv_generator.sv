@@ -104,15 +104,8 @@ module fv_generator(
   	// 1) 
     	state_idle_cover : cover property (@(posedge clk) ());
 
-*/
+	*/
 
-endmodule
-
-
-1)));
-// 1) Cover property for the multiplication scenario.
-//	multi_cover: cover property (@(posedge clk) disable iff (rst) ((enh_gen_fsm) && (data_temp == (data_select * amp_reg))));
-  
 endmodule
       
 module fv_funct_generator_fsm (
@@ -241,9 +234,38 @@ module fv_funct_generator_adder (
 
 endmodule
 
+module fv_funct_generator_multi (
+	input  logic 				enh, 
+	input  logic signed[DATA_WIDTH-1:0]	a_i,
+	input  logic signed[DATA_WIDTH-1:0]	b_i,
+	input logic signed [DATA_WIDTH_OUT-1:0] data_o
+);
+
+///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
+
+	// 1) Assume that the a_i is stable during the clock cycle.
+	assume property (@(posedge clk) $stable(a_i));
+	// 2) Assume that the b_i is stable during the clock cycle.
+	assume property (@(posedge clk) $stable(b_i));
+
+///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
+
+	// 1) The property assures multiplication operation.
+	//multiplication_correct: assert property (@(posedge clk) disable iff (rst) (enh) |-> (data_o == (a_i * b_i))) $info("Assetion pass clrh_on_data_o_zero");
+	//else $error(" Asserion fail clrh_on_data_o_zero");
+
+ 
+///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
+   	
+	// 1) Cover property for the multiplication scenario.
+	multi_cover: cover property (@(posedge clk) disable iff (rst) ((enh_gen_fsm) && (data_o == (a_i * b_i))));
+
+endmodule
+
 bind funct_generator fv_generator fv_generator_inst(.*); 
 bind funct_generator_adder fv_funct_generator_adder fv_generator_adder_inst(.*);
 bind funct_generator_fsm fv_funct_generator_fsm fv_generator_fsm_inst(.*);
+bind funct_generator_multi fv_funct_generator_multi fv_generator_multi_inst(.*);
 
 
 
