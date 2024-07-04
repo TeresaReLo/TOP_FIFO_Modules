@@ -200,10 +200,9 @@ module fv_funct_generator_mux(
 	input logic signed [DATA_WIDTH-1 : 0] 	data_o
 );
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
-
-	// 1) .
-	//assume property (@(posedge clk) $stable(a_i));
-
+	
+	// 1) Assume that if ehn is not active data_o value is 0.
+	assume property (@(posedge clk) disable iff (rst) (!enh) |-> (data_o == '0));
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
@@ -225,16 +224,16 @@ module fv_funct_generator_mux(
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
 	// 1) Covers when enable is active and selector value is 0.
-	cover property (@(posedge clk) enh && (sel_i == 2'b00));
+	cover_enh_1_sel_0: cover property (@(posedge clk) enh && (sel_i == 2'b00));
 	
 	// 2) Covers when enable is active and selector value is 1.
-	cover property (@(posedge clk) enh && (sel_i == 2'b01));
+	cover_enh_1_sel_1: cover property (@(posedge clk) enh && (sel_i == 2'b01));
 
 	// 3) Covers when enable is active and selector value is 2.
-	cover property (@(posedge clk) enh && (sel_i == 2'b10));
+	cover_enh_1_sel_2: cover property (@(posedge clk) enh && (sel_i == 2'b10));
 
 	// 4) Covers when enable is active and selector value is 3.
-	cover property (@(posedge clk) enh && (sel_i == 2'b11));
+	cover_enh_1_sel_3: cover property (@(posedge clk) enh && (sel_i == 2'b11));
 
 endmodule
 
@@ -250,8 +249,8 @@ module fv_funct_generator_register(
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
-	// 1) .
-	//assume property (@(posedge clk) $stable(a_i));
+	// 1) Assume that if ehn is not active data_o value is 0.
+	assume property (@(posedge clk) disable iff (rst) (!enh) |-> (data_o == '0));
 
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
