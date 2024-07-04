@@ -249,34 +249,43 @@ module fv_funct_generator_register(
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
-	// 1) Assume that if ehn is not active data_o value is 0.
-	assume property (@(posedge clk) disable iff (rst) (!enh) |-> (data_o == '0));
+	// 1) Assumes that the input d is not unknown.
+	assume property (@(posedge clk) !$isunknown(d));
 
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
 	// 1) The property assures  that when rst is active, q should be RESET_VALUE.
-	when_rst_1_q_is_reset_value: assert property (@(posedge clk) ) $info("Assetion pass when_rst_1_q_is_reset_value");
-	//else $error(" Asserion fail when_rst_1_q_is_reset_value");
+	when_rst_1_q_is_reset_value: assert property (@(posedge clk) rst |-> (q == RESET_VALUE)) $info("Assetion pass when_rst_1_q_is_reset_value");
+	else $error(" Asserion fail when_rst_1_q_is_reset_value");
 
 
 	// 2) The property assures  that when clrh is active, q should be RESET_VALUE.
-	when_clrh_1_q_is_reset_value: assert property (@(posedge clk) ) $info("Assetion pass when_rst_1_q_is_reset_value");
-	//else $error(" Asserion fail when_rst_1_q_is_reset_value");
+	when_clrh_1_q_is_reset_value: assert property (@(posedge clk) clrh |=> (q == RESET_VALUE)) $info("Assetion pass when_clrh_1_q_is_reset_value");
+	else $error(" Asserion fail when_clrh_1_q_is_reset_value");
 
 
 	// 3) The property assures that when enh is active, q should be equal to d.
-	when_ehn_1_q_is_d: assert property (@(posedge clk) ) $info("Assetion pass when_rst_1_q_is_reset_value");
-	//else $error(" Asserion fail when_rst_1_q_is_reset_value");
+	when_ehn_1_q_is_d: assert property (@(posedge clk) (enh && (!clrh) && (!rst)) |=> (q == $past(d))) $info("Assetion pass when_ehn_1_q_is_d");
+	else $error(" Asserion fail when_ehn_1_q_is_d");
 
 
 	// 4) The property assures that when neither enh, clrh, nor rst is active, q should hold its previous value.
-	q_holds_prev_value: assert property (@(posedge clk) ) $info("Assetion pass when_rst_1_q_is_reset_value");
-	//else $error(" Asserion fail when_rst_1_q_is_reset_value");
+	q_holds_prev_value: assert property (@(posedge clk)  ((!enh) && (!clrh) && (!rst)) |=> (q == $past(q))) $info("Assetion pass q_holds_prev_value");
+	else $error(" Asserion fail q_holds_prev_value");
 
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
-	// 1).
+	// 1) Covers when rst happen.
+	cover_rst: cover property (@(posedge clk)(rst));
+
+	// 2) Covers when clrh happen.
+	cover_clrh: cover property (@(posedge clk)(clrh));
+
+	// 3) Covers when enh happen.
+	cover_enh: cover property (@(posedge clk) (enh));
+
+	
 
 endmodule
 
