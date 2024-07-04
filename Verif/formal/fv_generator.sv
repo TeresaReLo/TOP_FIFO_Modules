@@ -177,12 +177,16 @@ module fv_funct_generator_lut(
 	read_addr_i_valid_range: assert property (@(posedge clk) read_addr_i < (2**ADDR_WIDTH)) $info("Assetion pass read_addr_i_valid_range");
 	else $error(" Asserion fail read_addr_i_valid_range");	
 	// 3) The property assures that if read_addr_i is valid  then the read_data_o should match the value stored in lut_structure at read_addr_i
-	read_data_o_when_valid_read_addr_i: assert property (@(posedge clk) (read_addr_i < (2**ADDR_WIDTH)) |=> (read_data_o == lut_structure[read_addr_i])) $info("Assetion pass read_data_o_when_valid_read_addr_i");
+	read_data_o_when_valid_read_addr_i: assert property (@(posedge clk) (read_addr_i < (2**ADDR_WIDTH)) |=> (read_data_o == lut_structure[$past(read_addr_i)])) $info("Assetion pass read_data_o_when_valid_read_addr_i");
 	else $error(" Asserion fail read_data_o_when_valid_read_addr_i");
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
-	// 1).
-	 cover_read_data_o_valid: cover property (@(posedge clk) $isunknown(read_data_o) == 0);
+	// 1) Covers that read operation occurs at least once.
+	 cover_read_operation: cover property (@(posedge clk) read_addr_i && (read_data_o == lut_structure[$past(read_addr_i)]));
+  	// 2) Covers that output data does not contain unknown values.
+	cover_read_data_o_valid: cover property (@(posedge clk) $isunknown(read_data_o) == 0);
+  	// 3) Covers valid address increment.
+	cover_read_add_i_incrementing: cover property (@(posedge clk) (read_addr_i == $past(read_addr_i) + 1));
 
 endmodule
 
