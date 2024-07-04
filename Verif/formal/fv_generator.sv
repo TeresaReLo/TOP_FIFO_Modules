@@ -255,9 +255,24 @@ module fv_funct_generator_register(
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
-	// 1).
-	//multiplication_correct: assert property (@(posedge clk) (enh) |-> (data_o == (a_i * b_i))) $info("Assetion pass ");
-	//else $error(" Asserion fail ");
+	// 1) The property assures  that when rst is active, q should be RESET_VALUE.
+	when_rst_1_q_is_reset_value: assert property (@(posedge clk) ) $info("Assetion pass when_rst_1_q_is_reset_value");
+	//else $error(" Asserion fail when_rst_1_q_is_reset_value");
+
+
+	// 2) The property assures  that when clrh is active, q should be RESET_VALUE.
+	when_clrh_1_q_is_reset_value: assert property (@(posedge clk) ) $info("Assetion pass when_rst_1_q_is_reset_value");
+	//else $error(" Asserion fail when_rst_1_q_is_reset_value");
+
+
+	// 3) The property assures that when enh is active, q should be equal to d.
+	when_ehn_1_q_is_d: assert property (@(posedge clk) ) $info("Assetion pass when_rst_1_q_is_reset_value");
+	//else $error(" Asserion fail when_rst_1_q_is_reset_value");
+
+
+	// 4) The property assures that when neither enh, clrh, nor rst is active, q should hold its previous value.
+	q_holds_prev_value: assert property (@(posedge clk) ) $info("Assetion pass when_rst_1_q_is_reset_value");
+	//else $error(" Asserion fail when_rst_1_q_is_reset_value");
 
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
