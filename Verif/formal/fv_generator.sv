@@ -170,13 +170,15 @@ module fv_funct_generator_lut(
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
-	// 1).
-	//multiplication_correct: assert property (@(posedge clk) (enh) |-> (data_o == (a_i * b_i))) $info("Assetion pass ");
-	//else $error(" Asserion fail ");
-
+	// 1) The property assures  that the read_data_o signal does not contain any unknown values.
+	read_data_o_valid: assert property (@(posedge clk) read_addr_i |=> $isunknown(read_data_o) == 0) $info("Assetion pass read_data__o_valid");
+	else $error(" Asserion fail read_data__o_valid");
+	// 2) The property assures that the read address (read_addr_i) is within the valid range of addresses for the LUT
+	read_addr_i_valid_range: assert property (@(posedge clk) 	
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
 	// 1).
+	 cover_read_data_o_valid: cover property (@(posedge clk) $isunknown(read_data_o) == 0);
 
 endmodule
 
