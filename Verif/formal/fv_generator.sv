@@ -176,6 +176,9 @@ module fv_funct_generator_lut(
 	// 2) The property assures that the read address (read_addr_i) is within the valid range of addresses for the LUT
 	read_addr_i_valid_range: assert property (@(posedge clk) read_addr_i < (2**ADDR_WIDTH)) $info("Assetion pass read_addr_i_valid_range");
 	else $error(" Asserion fail read_addr_i_valid_range");	
+	// 3) The property assures that if read_addr_i is valid  then the read_data_o should match the value stored in lut_structure at read_addr_i
+	read_data_o_when_valid_read_addr_i: assert property (@(posedge clk) (read_addr_i < (2**ADDR_WIDTH)) |=> (read_data_o == lut_structure[read_addr_i])) $info("Assetion pass read_data_o_when_valid_read_addr_i");
+	else $error(" Asserion fail read_data_o_when_valid_read_addr_i");
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
 	// 1).
