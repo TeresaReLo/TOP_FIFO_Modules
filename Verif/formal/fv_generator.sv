@@ -347,12 +347,12 @@ module fv_generator(
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
-	// 1) The property assures that when clrh is high, the output data_o is set to zero.
-	clrh_on_data_o_zero: assert property (@(posedge clk) disable iff (rst) (clrh_addr_fsm) |-> (addr_temp == 0)) $info("Assetion pass clrh_on_data_o_zero");
+	// 1) The property assures that when clrh is high, the output addr_temp is set to zero.
+	clrh_on_addr_temp_zero: assert property (@(posedge clk) disable iff (rst) (clrh_addr_fsm) |-> (addr_temp == 0)) $info("Assetion pass clrh_on_data_o_zero");
 	else $error(" Asserion fail clrh_on_data_o_zero");
 	
-	// 2) The property assures that when enh is low and clrh is low, the output data_o remains unchanged.
-	data_o_stability_when_disabled: assert property (@(posedge clk) disable iff (rst) (!enh_gen_fsm && !clrh_addr_fsm) |=> (addr_temp == $past(addr_temp)))
+	// 2) The property assures that when enh is low and clrh is low, the output addr_temp remains unchanged.
+	addr_temp_stability_when_disabled: assert property (@(posedge clk) disable iff (rst) (!enh_gen_fsm && !clrh_addr_fsm) |=> (addr_temp == $past(addr_temp)))
 	$info("Assetion pass data_o_stability_when_disabled"); else $error(" Asserion fail data_o_stability_when_disabled");
 	
 	// 3) The property assures that the adder adds 1 to the current addess to produce the next addess when enh is high.
@@ -362,8 +362,8 @@ module fv_generator(
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
    	
-	// 1) Cover that is data_o is 0 when clrh is asserted.
-	clrh_clears_output: cover property (@(posedge clk) disable iff (rst) (clrh_addr_fsm && (addr_temp == 0)));
+	// 1) Cover that is addr_temp is 0 when clrh is asserted.
+	clrh_clears_addr_temp: cover property (@(posedge clk) disable iff (rst) (clrh_addr_fsm && (addr_temp == 0)));
 	
 	// 2) Cover the scenario where enh is high, clrh is low, and addr_temp is addr + 1. 
 	next_address_is_addr_plus_1: cover property (@(posedge clk) disable iff (rst) (enh_gen_fsm && !clrh_addr_fsm && (addr_temp == addr + 1)));
