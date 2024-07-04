@@ -164,8 +164,8 @@ module fv_funct_generator_lut(
 );
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
-	// 1) .
-	//assume property (@(posedge clk) $stable(a_i));
+	// 1) Assumes that the address provided for reading is always within the valid range.
+	assume property (@(posedge clk) read_addr_i < (2**ADDR_WIDTH));
 
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
