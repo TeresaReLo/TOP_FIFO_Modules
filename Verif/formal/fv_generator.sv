@@ -224,7 +224,17 @@ module fv_funct_generator_mux(
 	else $error(" Asserion fail data_o_is_data_3_i");
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
-	// 1).
+	// 1) Covers when enable is active and selector value is 0.
+	cover property (@(posedge clk) enh && (sel_i == 2'b00));
+	
+	// 2) Covers when enable is active and selector value is 1.
+	cover property (@(posedge clk) enh && (sel_i == 2'b01));
+
+	// 3) Covers when enable is active and selector value is 2.
+	cover property (@(posedge clk) enh && (sel_i == 2'b10));
+
+	// 4) Covers when enable is active and selector value is 3.
+	cover property (@(posedge clk) enh && (sel_i == 2'b11));
 
 endmodule
 
