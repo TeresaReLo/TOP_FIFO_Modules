@@ -103,7 +103,8 @@ module fv_funct_generator_fsm (
          
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
-	// 1)
+	// 1) Assumption that the initial state is IDLE.
+	//initial_state_is_idle: assume property (@(posedge clk) disable iff (rst) (state == IDLE));
 
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
@@ -121,11 +122,11 @@ module fv_funct_generator_fsm (
 	else $error(" Asserion fail idle_stable");
 
 	// 4)	This property assures state transition from CONFIG to GEN when enh_conf_i and en_low_i are not active.
-	whenconfig_next_gen: assert property (@(posedge clk) disable iff (rst) (state_f == CONFIG && (!enh_conf_i) && (!en_low_i)) |-> (next_f == GEN))  $info("Assetion pass whenconfig_next_gen");
+	whenconfig_next_gen: assert property (@(posedge clk) disable iff (rst) (state_f == CONFI && (!enh_conf_i) && (!en_low_i)) |-> (next_f == GEN))  $info("Assetion pass whenconfig_next_gen");
 	else $error(" Asserion fail whenconfig_next_gen");
 
 	// 5)	This property assures state transition from CONFIG to IDLE when enh_conf_i and en_low_i are not asserted 
-	whenconfig_next_idle: assert property (@(posedge clk) disable iff (rst) (state_f == CONFIG && (!enh_conf_i) && en_low_i) |-> (next_f == IDLE))  $info("Assetion pass whenconfig_next_idle");
+	whenconfig_next_idle: assert property (@(posedge clk) disable iff (rst) (state_f == CONFI && (!enh_conf_i) && en_low_i) |-> (next_f == IDLE))  $info("Assetion pass whenconfig_next_idle");
 	else $error(" Asserion fail whenconfig_next_idle");
 
 	// 6)	This property assures state transition from GEN to CONFI when enh_conf_i is asserted.
