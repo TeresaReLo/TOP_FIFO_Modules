@@ -8,6 +8,8 @@ module fv_funct_generator_adder (
 	input  logic [`DATA_WIDTH-1:0] 	data_c_i,
 	input  logic [`DATA_WIDTH-1:0]  	data_o 
 );
+	bit clk;
+	//`define CLK_PATH top.clk
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
@@ -44,6 +46,7 @@ module fv_funct_generator_multi (
 	input  logic signed[`DATA_WIDTH-1:0]	b_i,
 	input logic signed [`DATA_WIDTH_OUT-1:0] data_o
 );
+	bit clk;
 /*
  	bit clk;
   	bit rst;
@@ -237,6 +240,7 @@ module fv_funct_generator_mux(
 	input  logic signed[`DATA_WIDTH-1 : 0] 	data_3_i,
 	input logic signed [`DATA_WIDTH-1 : 0] 	data_o
 );
+	bit clk;
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 	
 	// 1) Assume that if ehn is not active data_o value is 0.
