@@ -40,9 +40,9 @@ endmodule
 
 module fv_funct_generator_multi (
 	input  logic 				enh, 
-	input  logic signed[DATA_WIDTH-1:0]	a_i,
-	input  logic signed[DATA_WIDTH-1:0]	b_i,
-	input logic signed [DATA_WIDTH_OUT-1:0] data_o
+	input  logic signed[`DATA_WIDTH-1:0]	a_i,
+	input  logic signed[`DATA_WIDTH-1:0]	b_i,
+	input logic signed [`DATA_WIDTH_OUT-1:0] data_o
 );
 /*
  	bit clk;
@@ -196,9 +196,9 @@ endmodule
 
 module fv_funct_generator_lut( 
 		input  logic                  		clk,		
-		input  logic [ADDR_WIDTH-1:0] 		read_addr_i,
-		input logic signed [DATA_WIDTH-1 : 0] 	read_data_o,
-		reg [3:4-DATA_WIDTH] lut_structure [2**ADDR_WIDTH-1:0]
+	input  logic [`ADDR_WIDTH-1:0] 		read_addr_i,
+	input logic signed [`DATA_WIDTH-1 : 0] 	read_data_o,
+	reg [3:4-`DATA_WIDTH] lut_structure [2**`ADDR_WIDTH-1:0]
 );
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
