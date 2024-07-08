@@ -247,7 +247,7 @@ module fv_funct_generator_mux(
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 	
 	// 1) Assume that if ehn is not active data_o value is 0.
-	assume property (@(posedge clk) disable iff (rst) (!enh) |-> (data_o == '0));
+	assume property (@(posedge clk) (!enh) |-> (data_o == '0));
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
