@@ -3,10 +3,10 @@ import fifo_defines_pkg::*;
 module fv_funct_generator_adder (
 	input  logic 	    		clrh,
 	input  logic 	    		enh,
-	input  logic [DATA_WIDTH-1:0]  	data_a_i,
-	input  logic [DATA_WIDTH-1:0]  	data_b_i,
-	input  logic [DATA_WIDTH-1:0] 	data_c_i,
-	input  logic [DATA_WIDTH-1:0]  	data_o 
+	input  logic [`DATA_WIDTH-1:0]  	data_a_i,
+	input  logic [`DATA_WIDTH-1:0]  	data_b_i,
+	input  logic [`DATA_WIDTH-1:0] 	data_c_i,
+	input  logic [`DATA_WIDTH-1:0]  	data_o 
 );
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
@@ -231,11 +231,11 @@ endmodule
 module fv_funct_generator_mux(
 	input  logic       [1:0] 	    	sel_i, 
 	input  logic                 	    	enh, 
-	input  logic signed[DATA_WIDTH-1 : 0] 	data_0_i,
-	input  logic signed[DATA_WIDTH-1 : 0] 	data_1_i,
-	input  logic signed[DATA_WIDTH-1 : 0] 	data_2_i,
-	input  logic signed[DATA_WIDTH-1 : 0] 	data_3_i,
-	input logic signed [DATA_WIDTH-1 : 0] 	data_o
+	input  logic signed[`DATA_WIDTH-1 : 0] 	data_0_i,
+	input  logic signed[`DATA_WIDTH-1 : 0] 	data_1_i,
+	input  logic signed[`DATA_WIDTH-1 : 0] 	data_2_i,
+	input  logic signed[`DATA_WIDTH-1 : 0] 	data_3_i,
+	input logic signed [`DATA_WIDTH-1 : 0] 	data_o
 );
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 	
@@ -281,8 +281,8 @@ module fv_funct_generator_register(
 	input  logic 		        rst,
 	input  logic 		        clrh,
 	input  logic 		        enh,
-	input  logic [DATA_WIDTH - 1:0] d,
-	input logic [DATA_WIDTH - 1:0] 	q	
+	input  logic [`DATA_WIDTH - 1:0] d,
+	input logic [`DATA_WIDTH - 1:0] 	q	
 );
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
@@ -336,14 +336,14 @@ module fv_generator(
 		input  logic	     [1:0]	                sel_i,
 		input logic                                	wr_en_o,
   		input logic signed  [DATA_WIDTH-1 : 0]  	data_o,
-  		logic        [LUT_ADDR-1:0] 			addr, addr_temp,
-  		logic        [DATA_WIDTH-1 : 0]			amp_reg,
-  		logic signed [DATA_WIDTH-1 : 0] 		cos_temp,
-  		logic signed [DATA_WIDTH-1 : 0] 		sin_temp,
-  		logic signed [DATA_WIDTH-1 : 0] 		trian_temp,
-  		logic signed [DATA_WIDTH-1 : 0] 		squa_temp,
-  		logic signed [DATA_WIDTH-1 : 0] 		data_select,
-  		logic signed [(DATA_WIDTH*2)-1:0] 		data_temp,
+	logic        [`LUT_ADDR-1:0] 			addr, addr_temp,
+	logic        [`DATA_WIDTH-1 : 0]			amp_reg,
+	logic signed [`DATA_WIDTH-1 : 0] 		cos_temp,
+	logic signed [`DATA_WIDTH-1 : 0] 		sin_temp,
+	logic signed [`DATA_WIDTH-1 : 0] 		trian_temp,
+	logic signed [`DATA_WIDTH-1 : 0] 		squa_temp,
+	logic signed [`DATA_WIDTH-1 : 0] 		data_select,
+	logic signed [(`DATA_WIDTH*2)-1:0] 		data_temp,
 		//FSM signals
 		bit enh_config_fsm,
 		bit clrh_addr_fsm,
