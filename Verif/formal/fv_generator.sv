@@ -461,8 +461,52 @@ module fv_generator(
   	// 5) Cover that  enh_conf_i signal is asserted.
 	cover_enh_conf_i: cover property (@(posedge clk) disable iff (rst) enh_conf_i);
 
+// ************************************************ funct_generator_lut *************************************/
+
+///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
+
+	// 1) Assume that the a_i is stable during the clock cycle.
+	
+     // 1) The property assures sin_temp has a valid value.
+	sin_temp_valid_data: assert property (@(posedge clk) disable iff (rst) !$isunknown(sin_temp)) $info("Assetion pass sin_temp_valid_data");
+	else $error(" Asserion failsin_temp_valid_data");
+
+      // 2) The property assures cos_temp has a valid value.
+	cos_temp_valid_data: assert property (@(posedge clk) disable iff (rst) !$isunknown(cos_temp)) $info("Assetion pass cos_temp_valid_data");
+      else $error(" Asserion fail cos_temp_valid_data");
+
+      // 3) The property assures trian_temp has a valid value.
+	trian_temp_valid_data: assert property (@(posedge clk) disable iff (rst) !$isunknown(trian_temp)) $info("Assetion pass trian_temp_valid_data");
+	else $error(" Asserion failtrian_temp_valid_data");
+
+      // 4) The property assures squa_temp has a valid value.
+	squa_temp_valid_data: assert property (@(posedge clk) disable iff (rst) !$isunknown(squa_temp)) $info("Assetion pass squa_temp_valid_data");
+	else $error(" Asserion fail squa_temp_valid_data");
+ 
+///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
+   	
+      // 1) Covers when addr reaches max value.
+	//cover_sin_max_addr: cover property (@(posedge clk) disable iff (rst) addr == 2**ADDR_WIDTH - 1);
 	
 
+
+// ************************************************ funct_generator_mux *************************************/
+
+///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
+
+	// 1) Assume that the a_i is stable during the clock cycle.
+	
+
+///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
+
+	// 1) The property assures when enh_gen_fsm is active the multiplication operation performs correcty.
+	
+
+ 
+///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
+   	
+	// 1) Cover property for the multiplication scenario.
+	
 endmodule
 
 bind funct_generator fv_generator fv_generator_inst(.*); 
