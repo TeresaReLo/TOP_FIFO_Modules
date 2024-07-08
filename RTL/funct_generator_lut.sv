@@ -29,7 +29,7 @@ module funct_generator_lut #(
 );
 
 // signal declaration
-reg [DATA_WIDTH-1] lut_structure [2**ADDR_WIDTH-1:0]; 
+	reg [DATA_WIDTH-1:0] lut_structure [2**ADDR_WIDTH-1:0]; 
 
 initial begin  //load hexadecimal data in txt
 		$readmemh(TXT_FILE, lut_structure);		
