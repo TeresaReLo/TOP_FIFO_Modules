@@ -3,10 +3,10 @@ import fifo_defines_pkg::*;
 module fv_funct_generator_adder (
 	input  logic 	    		clrh,
 	input  logic 	    		enh,
-	input  logic [`DATA_WIDTH-1:0]  	data_a_i,
-	input  logic [`DATA_WIDTH-1:0]  	data_b_i,
+	input  logic [`DATA_WIDTH-1:0]  data_a_i,
+	input  logic [`DATA_WIDTH-1:0]  data_b_i,
 	input  logic [`DATA_WIDTH-1:0] 	data_c_i,
-	input  logic [`DATA_WIDTH-1:0]  	data_o 
+	input  logic [`DATA_WIDTH-1:0]  data_o 
 );
 	bit clk;
 	//`define CLK_PATH top.clk
@@ -44,7 +44,7 @@ module fv_funct_generator_multi (
 	input  logic 				enh, 
 	input  logic signed[`DATA_WIDTH-1:0]	a_i,
 	input  logic signed[`DATA_WIDTH-1:0]	b_i,
-	input logic signed [`DATA_WIDTH_OUT-1:0] data_o
+	input logic signed [(`DATA_WIDTH*2)-1:0] data_o
 );
 	bit clk;
 /*
@@ -197,11 +197,14 @@ module fv_funct_generator_fsm (
 endmodule
 
 
-module fv_funct_generator_lut( 
-		input  logic                  		clk,		
-	input  logic [`ADDR_WIDTH-1:0] 		read_addr_i,
-	input logic signed [`DATA_WIDTH-1 : 0] 	read_data_o,
-	reg [3:4-`DATA_WIDTH] lut_structure [2**`ADDR_WIDTH-1:0]
+module fv_funct_generator_lut #(
+		parameter DATA_WIDTH= `DATA_WIDTH,
+		parameter ADDR_WIDTH= `LUT_ADDR
+)( 
+	input  logic                  		clk,		
+	input  logic [ADDR_WIDTH-1:0] 		read_addr_i,
+	input logic signed [DATA_WIDTH-1 : 0] 	read_data_o,
+	reg [DATA_WIDTH-1 : 0] lut_structure [2**ADDR_WIDTH-1:0]
 );
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
@@ -218,7 +221,7 @@ module fv_funct_generator_lut(
 	read_addr_i_valid_range: assert property (@(posedge clk) read_addr_i < (2**ADDR_WIDTH)) $info("Assetion pass read_addr_i_valid_range");
 	else $error(" Asserion fail read_addr_i_valid_range");	
 	// 3) The property assures that if read_addr_i is valid  then the read_data_o should match the value stored in lut_structure at read_addr_i
-	read_data_o_when_valid_read_addr_i: assert property (@(posedge clk) (read_addr_i < (2**ADDR_WIDTH)) |=> (read_data_o == lut_structure[$past(read_addr_i)])) $info("Assetion pass read_data_o_when_valid_read_addr_i");
+		read_data_o_when_valid_read_addr_i: assert property (@(posedge clk) (read_addr_i < (2**ADDR_WIDTH)) |=> (read_data_o == lut_structure[$past(read_addr_i)])) $info("Assetion pass read_data_o_when_valid_read_addr_i");
 	else $error(" Asserion fail read_data_o_when_valid_read_addr_i");
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
@@ -281,29 +284,29 @@ endmodule
 
 
 module fv_funct_generator_register(
-	input  logic 		        clk,
-	input  logic 		        rst,
-	input  logic 		        clrh,
-	input  logic 		        enh,
-	input  logic [`DATA_WIDTH - 1:0] d,
+	input  logic 		       		clk,
+	input  logic 		        	rst,
+	input  logic 		        	clrh,
+	input  logic 		        	enh,
+	input  logic [`DATA_WIDTH - 1:0]	d,
 	input logic [`DATA_WIDTH - 1:0] 	q	
 );
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
 	// 1) Assumes that the input d is not unknown.
-	assume property (@(posedge clk) !$isunknown(d));
+	//assume property (@(posedge clk) !$isunknown(d));
 
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
 	// 1) The property assures  that when rst is active, q should be RESET_VALUE.
-	when_rst_1_q_is_reset_value: assert property (@(posedge clk) rst |-> (q == RESET_VALUE)) $info("Assetion pass when_rst_1_q_is_reset_value");
+	when_rst_1_q_is_reset_value: assert property (@(posedge clk) rst |-> (q == `RESET_VALUE)) $info("Assetion pass when_rst_1_q_is_reset_value");
 	else $error(" Asserion fail when_rst_1_q_is_reset_value");
 
 
 	// 2) The property assures  that when clrh is active, q should be RESET_VALUE.
-	when_clrh_1_q_is_reset_value: assert property (@(posedge clk) clrh |=> (q == RESET_VALUE)) $info("Assetion pass when_clrh_1_q_is_reset_value");
+		when_clrh_1_q_is_reset_value: assert property (@(posedge clk) clrh |=> (q == `RESET_VALUE)) $info("Assetion pass when_clrh_1_q_is_reset_value");
 	else $error(" Asserion fail when_clrh_1_q_is_reset_value");
 
 
@@ -332,27 +335,27 @@ module fv_funct_generator_register(
 endmodule
 
 module fv_generator(
-		input  logic 				     	clk,
-		input  logic 				     	rst,
-		input  logic 				       	en_low_i, 
-		input  logic 				       	enh_conf_i, 
-        	input  logic signed  [INT_BITS-1 : 0]	    	amp_i,  
-		input  logic	     [1:0]	                sel_i,
-		input logic                                	wr_en_o,
-  		input logic signed  [DATA_WIDTH-1 : 0]  	data_o,
+	input  logic 				     	clk,
+	input  logic 				     	rst,
+	input  logic 				       	en_low_i, 
+	input  logic 				       	enh_conf_i, 
+        input  logic signed  [`INT_BITS-1 : 0]	    	amp_i,  
+	input  logic	     [1:0]	                sel_i,
+	input logic                                	wr_en_o,
+  	input logic signed  [`DATA_WIDTH-1 : 0]  	data_o,
 	logic        [`LUT_ADDR-1:0] 			addr, addr_temp,
-	logic        [`DATA_WIDTH-1 : 0]			amp_reg,
+	logic        [`DATA_WIDTH-1 : 0]		amp_reg,
 	logic signed [`DATA_WIDTH-1 : 0] 		cos_temp,
 	logic signed [`DATA_WIDTH-1 : 0] 		sin_temp,
 	logic signed [`DATA_WIDTH-1 : 0] 		trian_temp,
 	logic signed [`DATA_WIDTH-1 : 0] 		squa_temp,
 	logic signed [`DATA_WIDTH-1 : 0] 		data_select,
 	logic signed [(`DATA_WIDTH*2)-1:0] 		data_temp,
-		//FSM signals
-		bit enh_config_fsm,
-		bit clrh_addr_fsm,
-		bit enh_gen_fsm,
-		bit en_config_amp
+	//FSM signals
+	bit enh_config_fsm,
+	bit clrh_addr_fsm,
+	bit enh_gen_fsm,
+	bit en_config_amp
      );
 
 	bit flag;
