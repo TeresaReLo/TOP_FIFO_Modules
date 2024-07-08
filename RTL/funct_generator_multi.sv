@@ -14,8 +14,8 @@
 */
 
 module funct_generator_multi #(
-	parameter DATA_WIDTH=8,
-	parameter DATA_WIDTH_OUT=(DATA_WIDTH*2)
+	parameter DATA_WIDTH=32,
+	localparam DATA_WIDTH_OUT=(DATA_WIDTH*2)
 )(
 	//INPUTS
 	input  logic 				enh, 
