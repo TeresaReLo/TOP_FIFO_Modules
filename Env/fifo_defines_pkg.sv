@@ -19,10 +19,10 @@ package fifo_defines_pkg;
     `define LUT_ADDR      4'h8
     `define RESET_VALUE   '0
     `define RESET_AMP     32'h10000000
-    `define COS_FILE      "/home/agodoy/Documents/DV/TOP_FIFO_Modules/RTL/cos.txt"
-    `define SIN_FILE      "/home/agodoy/Documents/DV/TOP_FIFO_Modules/RTL/sin.txt"
-    `define TRIAN_FILE    "/home/agodoy/Documents/DV/TOP_FIFO_Modules/RTL/triangular.txt"
-    `define SQUA_FILE     "/home/agodoy/Documents/DV/TOP_FIFO_Modules/RTL/square.txt"
+    `define COS_FILE      "../RTL/cos.txt"
+    `define SIN_FILE      "../RTL/sin.txt"
+    `define TRIAN_FILE    "../RTL/triangular.txt"
+    `define SQUA_FILE     "../RTL/square.txt"
     
 //`endif // SPI_DEFINES_SVH
 
