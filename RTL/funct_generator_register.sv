@@ -18,7 +18,7 @@
 */
 
 module funct_generator_register #(
-	parameter DATA_WIDTH = 8,
+	parameter DATA_WIDTH = 32,
 				 RESET_VALUE= 0
 
 )(
