@@ -1,5 +1,6 @@
 import fifo_defines_pkg::*;
-
+/*☆✼★☆✼★━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━★✼☆☆✼★｡
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 module fv_funct_generator_adder (
 	input  logic 	    		clrh,
 	input  logic 	    		enh,
@@ -8,89 +9,82 @@ module fv_funct_generator_adder (
 	input  logic [`DATA_WIDTH-1:0] 	data_c_i,
 	input  logic [`DATA_WIDTH-1:0]  data_o 
 );
-	bit clk;
-	//`define CLK_PATH top.clk
+	`define CLK_PATH fv_generator_inst.clk
+
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
 	// 1) Assume enable and clear signals are not active simultaneously.
-	enh_and_clrh_notactive_same: assume property (@(posedge clk) !(enh && clrh));
+ 	 enh_and_clrh_notactive_same: assume property (@(posedge `CLK_PATH) !(enh && clrh));
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
 	// 1) The property assures that when clrh is high, the output data_o is set to zero.
-	clrh_on_data_o_zero: assert property (@(posedge clk) (clrh) |-> (data_o == '0)) $info("Assetion pass clrh_on_data_o_zero");
+	clrh_on_data_o_zero: assert property (@(posedge `CLK_PATH) (clrh) |-> (data_o == '0)) $info("Assetion pass clrh_on_data_o_zero");
 	else $error(" Asserion fail clrh_on_data_o_zero");
 	
 	// 2) The property assures that when enh is 1 and clrh is 0 data_o is the sum of data_a_i, data_b_i, and data_c_i.
-	enh_on_data_o_increment: assert property (@(posedge clk) (enh && (!clrh)) |-> (data_o == (data_a_i + data_b_i + data_c_i)))
-	$info("Assetion pass enh_on_data_o_increment"); else $error(" Asserion fail enh_on_data_o_increment");
+	enh_on_data_o_increment: assert property (@(posedge `CLK_PATH) (enh && (!clrh)) |-> (data_o == (data_a_i + data_b_i + data_c_i))) $info("Assetion pass enh_on_data_o_increment");
+ 	else $error(" Asserion fail enh_on_data_o_increment");
 	
-	// 3) The property assures that when enh is active the adder adds 1 to the current addess to produce the next addess when enh is high.
-	data_o_stability_when_disabled: assert property (@(posedge clk) ((!enh) && (!clrh)) |=> (data_o == $past(data_o)))
-	$info("Assetion pass data_o_stability_when_disabled"); else $error(" Asserion fail data_o_stability_when_disabled");
-
+	// 3) The property assures that when enh is low and clrh is low, the output data_o remains unchanged.
+	data_o_stability_when_disabled: assert property (@(posedge `CLK_PATH) ((!enh) && (!clrh)) |=> (data_o == $past(data_o))) $info("Assetion pass data_o_stability_when_disabled"); 
+   	else $error(" Asserion fail data_o_stability_when_disabled");
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
+   	
 	// 1) Cover that is data_o is 0 when clrh is asserted.
- 	 clrh_clears_output: cover property (@(posedge clk) (clrh && (data_o == 0)));
+  	clrh_clears_output: cover property (@(posedge `CLK_PATH) (clrh && data_o == 0));
 	
 	// 2) Cover the scenario where enh is asserted and the adder performs the addition operation.
-    	enh_add_operation: cover property (@(posedge clk) (enh && (!clrh) && (data_o == (data_a_i + data_b_i + data_c_i))));
+      	enh_add_operation: cover property (@(posedge `CLK_PATH) (enh && (!clrh) && (data_o == (data_a_i + data_b_i + data_c_i))));
 
 endmodule
-
+/*☆✼★☆✼★━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━★✼☆☆✼★｡
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 module fv_funct_generator_multi (
 	input  logic 				enh, 
 	input  logic signed[`DATA_WIDTH-1:0]	a_i,
 	input  logic signed[`DATA_WIDTH-1:0]	b_i,
 	input logic signed [(`DATA_WIDTH*2)-1:0] data_o
 );
-	bit clk;
-/*
- 	bit clk;
-  	bit rst;
+	`define CLK_PATH fv_generator_inst.clk
+  	`define RST_PATH fv_generator_inst.rst
   	bit flag;
-  
-	always @(posedge clk) begin
-      if (rst == 1'b1)
-        flag <= 1'b0;
-      else 
-        flag <=1'b1;
+ 
+  	always @(posedge `CLK_PATH) begin
+      	if (`RST_PATH == 1'b1)
+        	flag <= 1'b0;
+      	else 
+        	flag <=1'b1;
   	end
-*/
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
-	// 1) Assume that the a_i is stable during the clock cycle.
-	//assume property (@(posedge clk) $stable(a_i));
-	// 2) Assume that the b_i is stable during the clock cycle.
-	//assume property (@(posedge clk) $stable(b_i));
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
-	// 1) The property assures when enh is active the multiplication operation performs correcty.
-	multiplication_correct: assert property (@(posedge clk) (enh) |-> (data_o == (a_i * b_i))) $info("Assetion pass multiplication_correct ");
-	else $error(" Asserion fail multiplication_correct ");
-	
-	//2) After reset  data_o will be assigned the value '0.
- //     data_o_0_when_rst: assert property (@(posedge clk) ($rose(flag)) |-> data_o == '0) $info("Assetion pass data_temp_0_when_rst");
-//	else $error(" Asserion fail data_temp_0_when_rst");
-	
+	//1) The property assures when enh is active the multiplication operation performs correcty
+      	multiplication_correct: assert property (@(posedge `CLK_PATH) (enh) |-> (data_o == (a_i * b_i))) $info("Assetion pas smultiplication_correct");
+	else $error(" Asserion fail multiplication_correct");
+      	
+  	//2) The property assures that after reset data_o will be assigned the value '0.
+      	data_o_0_when_rst: assert property (@(posedge `CLK_PATH) ($rose(flag)) |-> data_o == '0) $info("Assetion pass data_temp_0_when_rst");
+	else $error(" Asserion fail data_temp_0_when_rst");
+      	
 	// 3) The property assures that when enh is low the output data_o remains unchanged.
-      	data_o_stability_when_enh_0: assert property (@(posedge clk) (!enh) |=> (data_o == $past(data_o)))
-	$info("Assetion pass data_o_stability_when_enh_0");
+      	data_o_stability_when_enh_0: assert property (@(posedge `CLK_PATH) (!enh) |=> (data_o == $past(data_o)))$info("Assetion pass data_o_stability_when_enh_0");
 	else $error(" Asserion fail data_o_stability_when_enh_0");
 
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
    	
 	// 1) Cover property for the multiplication scenario.
-	multi_cover: cover property (@(posedge clk) ((enh) && (data_o == (a_i * b_i))));
+	multi_cover: cover property (@(posedge `CLK_PATH) ((enh) && (data_o == (a_i * b_i))));
 
 endmodule
-
-
+/*☆✼★☆✼★━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━★✼☆☆✼★｡
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 module fv_funct_generator_fsm (
   	input logic clk,
   	input logic rst,
@@ -106,7 +100,6 @@ module fv_funct_generator_fsm (
 	typedef enum logic  [1:0] {IDLE, CONFI, GEN, XX='x} state_t;
 	state_t state_f, next_f;
  	
-	///// Para utilizar los nombres de los estados en las aserciones ///////////////
     	always_comb begin
         	case(state) 
             	0: state_f = IDLE;
@@ -193,47 +186,52 @@ module fv_funct_generator_fsm (
 	// 6) enh_gen_fsm: signal is asserted.
 	cover_enh_gen_fsm: cover property (@(posedge clk) disable iff (rst) enh_gen_fsm);
 
-
 endmodule
-
-
+/*☆✼★☆✼★━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━★✼☆☆✼★｡
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 module fv_funct_generator_lut #(
-		parameter DATA_WIDTH= `DATA_WIDTH,
-		parameter ADDR_WIDTH= `LUT_ADDR
+	parameter DATA_WIDTH= `DATA_WIDTH,
+	parameter ADDR_WIDTH= `LUT_ADDR
 )( 
 	input  logic                  		clk,		
 	input  logic [ADDR_WIDTH-1:0] 		read_addr_i,
 	input logic signed [DATA_WIDTH-1 : 0] 	read_data_o,
 	reg [DATA_WIDTH-1 : 0] lut_structure [2**ADDR_WIDTH-1:0]
 );
+
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
 	// 1) Assumes that the address provided for reading is always within the valid range.
 	assume property (@(posedge clk) read_addr_i < (2**ADDR_WIDTH));
-
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
 	// 1) The property assures  that the read_data_o signal does not contain any unknown values.
 	read_data_o_valid: assert property (@(posedge clk) read_addr_i |=> $isunknown(read_data_o) == 0) $info("Assetion pass read_data__o_valid");
 	else $error(" Asserion fail read_data__o_valid");
+	
 	// 2) The property assures that the read address (read_addr_i) is within the valid range of addresses for the LUT
 	read_addr_i_valid_range: assert property (@(posedge clk) read_addr_i < (2**ADDR_WIDTH)) $info("Assetion pass read_addr_i_valid_range");
 	else $error(" Asserion fail read_addr_i_valid_range");	
+	
 	// 3) The property assures that if read_addr_i is valid  then the read_data_o should match the value stored in lut_structure at read_addr_i
-		read_data_o_when_valid_read_addr_i: assert property (@(posedge clk) (read_addr_i < (2**ADDR_WIDTH)) |=> (read_data_o == lut_structure[$past(read_addr_i)])) $info("Assetion pass read_data_o_when_valid_read_addr_i");
+	read_data_o_when_valid_read_addr_i: assert property (@(posedge clk) (read_addr_i < (2**ADDR_WIDTH)) |=> (read_data_o == lut_structure[$past(read_addr_i)])) $info("Assetion pass read_data_o_when_valid_read_addr_i");
 	else $error(" Asserion fail read_data_o_when_valid_read_addr_i");
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
+	
 	// 1) Covers that read operation occurs at least once.
 	 cover_read_operation: cover property (@(posedge clk) read_addr_i && (read_data_o == lut_structure[$past(read_addr_i)]));
-  	// 2) Covers that output data does not contain unknown values.
+  	
+	// 2) Covers that output data does not contain unknown values.
 	cover_read_data_o_valid: cover property (@(posedge clk) $isunknown(read_data_o) == 0);
-  	// 3) Covers valid address increment.
+  	
+	// 3) Covers valid address increment.
 	cover_read_add_i_incrementing: cover property (@(posedge clk) (read_addr_i == $past(read_addr_i) + 1));
 
 endmodule
-
+/*☆✼★☆✼★━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━★✼☆☆✼★｡
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 module fv_funct_generator_mux(
 	input  logic       [1:0] 	    	sel_i, 
 	input  logic                 	    	enh, 
@@ -243,86 +241,92 @@ module fv_funct_generator_mux(
 	input  logic signed[`DATA_WIDTH-1 : 0] 	data_3_i,
 	input logic signed [`DATA_WIDTH-1 : 0] 	data_o
 );
-	bit clk;
+	`define CLK_PATH fv_generator_inst.clk
+
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 	
 	// 1) Assume that if ehn is not active data_o value is 0.
-	assume property (@(posedge clk) (!enh) |-> (data_o == '0));
+	assume property (@(posedge `CLK_PATH) (!enh) |-> (data_o == '0));
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
 	// 1) The property assures data_o matches data_0_i when sel_i is 0 and enh is active.
-	data_o_is_data_0_i: assert property (@(posedge clk) (enh && (sel_i == 2'b00)) |-> data_o == data_0_i) $info("Assetion pass data_o_is_data_0_i");
+	data_o_is_data_0_i: assert property (@(posedge `CLK_PATH) (enh && (sel_i == 2'b00)) |-> data_o == data_0_i) $info("Assetion pass data_o_is_data_0_i");
 	else $error(" Asserion fail data_o_is_data_0_i");
 	
 	// 2) The property assures data_o matches data_1_i when sel_i is 1 and enh is active.
-	data_o_is_data_1_i: assert property (@(posedge clk) (enh && (sel_i == 2'b01)) |-> data_o == data_1_i) $info("Assetion pass data_o_is_data_1_i");
+	data_o_is_data_1_i: assert property (@(posedge `CLK_PATH) (enh && (sel_i == 2'b01)) |-> data_o == data_1_i) $info("Assetion pass data_o_is_data_1_i");
 	else $error(" Asserion fail data_o_is_data_1_i");
 
 	// 3) The property assures data_o matches data_2_i when sel_i is 2 and enh is active.
-	data_o_is_data_2_i: assert property (@(posedge clk) (enh && (sel_i == 2'b10)) |-> data_o == data_2_i) $info("Assetion pass data_o_is_data_2_i");
+	data_o_is_data_2_i: assert property (@(posedge `CLK_PATH) (enh && (sel_i == 2'b10)) |-> data_o == data_2_i) $info("Assetion pass data_o_is_data_2_i");
 	else $error(" Asserion fail data_o_is_data_2_i");
 
 	// 4) The property assures data_o matches data_3_i when sel_i is 3 and enh is active.
-	data_o_is_data_3_i: assert property (@(posedge clk) (enh && (sel_i == 2'b11)) |-> data_o == data_3_i) $info("Assetion pass data_o_is_data_3_i");
+	data_o_is_data_3_i: assert property (@(posedge `CLK_PATH) (enh && (sel_i == 2'b11)) |-> data_o == data_3_i) $info("Assetion pass data_o_is_data_3_i");
 	else $error(" Asserion fail data_o_is_data_3_i");
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
+	
 	// 1) Covers when enable is active and selector value is 0.
-	cover_enh_1_sel_0: cover property (@(posedge clk) enh && (sel_i == 2'b00));
+	cover_enh_1_sel_0: cover property (@(posedge `CLK_PATH) enh && (sel_i == 2'b00));
 	
 	// 2) Covers when enable is active and selector value is 1.
-	cover_enh_1_sel_1: cover property (@(posedge clk) enh && (sel_i == 2'b01));
+	cover_enh_1_sel_1: cover property (@(posedge `CLK_PATH) enh && (sel_i == 2'b01));
 
 	// 3) Covers when enable is active and selector value is 2.
-	cover_enh_1_sel_2: cover property (@(posedge clk) enh && (sel_i == 2'b10));
+	cover_enh_1_sel_2: cover property (@(posedge `CLK_PATH) enh && (sel_i == 2'b10));
 
 	// 4) Covers when enable is active and selector value is 3.
-	cover_enh_1_sel_3: cover property (@(posedge clk) enh && (sel_i == 2'b11));
+	cover_enh_1_sel_3: cover property (@(posedge `CLK_PATH) enh && (sel_i == 2'b11));
 
 endmodule
-
-
+/*☆✼★☆✼★━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━★✼☆☆✼★｡
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 module fv_funct_generator_register(
 	input  logic 		       		clk,
 	input  logic 		        	rst,
 	input  logic 		        	clrh,
 	input  logic 		        	enh,
 	input  logic [`DATA_WIDTH - 1:0]	d,
-	input logic [`DATA_WIDTH - 1:0] 	q	
+	input  logic [`DATA_WIDTH - 1:0] 	q	
 );
+  	bit flag;
+ 
+  	always @(posedge clk) begin
+      	if (rst == 1'b1)
+        	flag <= 1'b0;
+      	else 
+        	flag <=1'b1;
+  	end
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
 	// 1) Assumes that the input d is not unknown.
 	//assume property (@(posedge clk) !$isunknown(d));
 
-
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
 	// 1) The property assures  that when rst is active, q should be RESET_VALUE.
-	when_rst_1_q_is_reset_value: assert property (@(posedge clk) rst |-> (q == `RESET_VALUE)) $info("Assetion pass when_rst_1_q_is_reset_value");
+ 	 when_rst_1_q_is_reset_value: assert property (@(posedge clk) (!flag) |-> (q == `RESET_VALUE)) $info("Assetion pass when_rst_1_q_is_reset_value");
 	else $error(" Asserion fail when_rst_1_q_is_reset_value");
-
-
+	
 	// 2) The property assures  that when clrh is active, q should be RESET_VALUE.
-		when_clrh_1_q_is_reset_value: assert property (@(posedge clk) clrh |=> (q == `RESET_VALUE)) $info("Assetion pass when_clrh_1_q_is_reset_value");
+    	when_clrh_1_q_is_reset_value: assert property (@(posedge clk) clrh |=> (q == `RESET_VALUE)) $info("Assetion pass when_clrh_1_q_is_reset_value");
 	else $error(" Asserion fail when_clrh_1_q_is_reset_value");
 
-
 	// 3) The property assures that when enh is active, q should be equal to d.
-	when_ehn_1_q_is_d: assert property (@(posedge clk) (enh && (!clrh) && (!rst)) |=> (q == $past(d))) $info("Assetion pass when_ehn_1_q_is_d");
+	when_ehn_1_q_is_d: assert property (@(posedge clk) (enh) |=> (q == $past(d))) $info("Assetion pass when_ehn_1_q_is_d");
 	else $error(" Asserion fail when_ehn_1_q_is_d");
 
-
 	// 4) The property assures that when neither enh, clrh, nor rst is active, q should hold its previous value.
-	q_holds_prev_value: assert property (@(posedge clk)  ((!enh) && (!clrh) && (!rst)) |=> (q == $past(q))) $info("Assetion pass q_holds_prev_value");
+        q_holds_prev_value: assert property (@(posedge clk)  ((!enh) && (!clrh) && (flag)) |=> (q == $past(q))) $info("Assetion pass q_holds_prev_value");
 	else $error(" Asserion fail q_holds_prev_value");
 
- 
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
+	
 	// 1) Covers when rst happen.
-	cover_rst: cover property (@(posedge clk)(rst));
+	cover_rst: cover property (@(posedge clk) $rose(flag));
 
 	// 2) Covers when clrh happen.
 	cover_clrh: cover property (@(posedge clk)(clrh));
@@ -330,10 +334,9 @@ module fv_funct_generator_register(
 	// 3) Covers when enh happen.
 	cover_enh: cover property (@(posedge clk) (enh));
 
-	
-
 endmodule
-
+/*☆✼★☆✼★━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━★✼☆☆✼★｡
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 module fv_generator(
 	input  logic 				     	clk,
 	input  logic 				     	rst,
@@ -351,13 +354,11 @@ module fv_generator(
 	logic signed [`DATA_WIDTH-1 : 0] 		squa_temp,
 	logic signed [`DATA_WIDTH-1 : 0] 		data_select,
 	logic signed [(`DATA_WIDTH*2)-1:0] 		data_temp,
-	//FSM signals
 	bit enh_config_fsm,
 	bit clrh_addr_fsm,
 	bit enh_gen_fsm,
 	bit en_config_amp
      );
-
 	bit flag;
 	
 	always @(posedge clk) begin
@@ -367,8 +368,7 @@ module fv_generator(
         		flag <=1'b1;
  	end
 
-
-// ************************************************ funct_generator_adder *************************************/
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ funct_generator_adder ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━//
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
@@ -389,7 +389,6 @@ module fv_generator(
 	addr_increment1_when_enh: assert property (@(posedge clk) disable iff (rst) (enh_gen_fsm && !clrh_addr_fsm) |-> (addr_temp == addr + 1))
 	$info("Assetion pass addr_increment1_when_enh"); else $error(" Asserion fail addr_increment1_when_enh");
 
- 
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
    	
 	// 1) Cover that is addr_temp is 0 when clrh is asserted.
@@ -398,15 +397,10 @@ module fv_generator(
 	// 2) Cover the scenario where enh is high, clrh is low, and addr_temp is addr + 1. 
 	next_address_is_addr_plus_1: cover property (@(posedge clk) disable iff (rst) (enh_gen_fsm && !clrh_addr_fsm && (addr_temp == addr + 1)));
 
-
-// ************************************************ funct_generator_multi *************************************/
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ funct_generator_multi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━//
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
-	// 1) Assume that the a_i is stable during the clock cycle.
-	//assume property (@(posedge clk) disable iff (rst) $stable(data_select));
-	// 2) Assume that the b_i is stable during the clock cycle.
-	//assume property (@(posedge clk) disable iff (rst) $stable(amp_reg));
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
@@ -414,20 +408,16 @@ module fv_generator(
 	multiplication_correct: assert property (@(posedge clk) disable iff (rst) (enh_gen_fsm) |-> (data_temp == (data_select * amp_reg))) $info("Assetion pass clrh_on_data_o_zero");
 	else $error(" Asserion fail clrh_on_data_o_zero");
 
- 
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
    	
 	// 1) Cover property for the multiplication scenario.
 	cover_multiplication: cover property (@(posedge clk) disable iff (rst) ((enh_gen_fsm) && (data_temp == (data_select * amp_reg))));
 
-// ************************************************ funct_generator_fsm *************************************/
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ funct_generator_fsm ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━//
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
-
-	// 1)
 
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
-
 	
       	// 1)The property assures that after rst enh_config_fsm is 0
       	enh_config_fsm_0_when_rst: assert property (@(posedge clk) disable iff (rst) ($rose(flag)) |=>  enh_config_fsm == 1'b0) $info("Assetion pass enh_config_fsm_0_when_rst");
@@ -442,15 +432,13 @@ module fv_generator(
 	else $error(" Asserion fail clrh_addr_fsm_0_when_rst");
       
  	//  4) The property assures GEN to CONFI transition
-	//assert_gen_to_confi: assert property (@(posedge clk) disable iff (rst) (enh_gen_fsm && enh_conf_i) |=> (enh_config_fsm)) $info("Assetion pass assert_gen_to_confi");
+	assert_gen_to_confi: assert property (@(posedge clk) disable iff (rst) (enh_gen_fsm && enh_conf_i) |=> (enh_config_fsm)) $info("Assetion pass assert_gen_to_confi");
 	//else $error(" Asserion fail assert_gen_to_confi");
 
 	// 5) The property assures CONFI to GEN transition
-  	//assert_confi_to_gen: assert property (@(posedge clk) disable iff (rst) (enh_config_fsm && (!en_low_i)) |=> (enh_gen_fsm)) $info("Assetion pass assert_confi_to_gen");
-	//else $error(" Asserion fail assert_confi_to_gen");
+  	assert_confi_to_gen: assert property (@(posedge clk) disable iff (rst) (enh_config_fsm && (!en_low_i)) |=> (enh_gen_fsm)) $info("Assetion pass assert_confi_to_gen");
+	else $error(" Asserion fail assert_confi_to_gen");
         
-       
-
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
    
   	// 1) Cover that clrh_addr_fsm signal is asserted.
@@ -464,40 +452,39 @@ module fv_generator(
       
   	// 4) Cover that  en_low_i signal is asserted.
    	cover_en_low_i: cover property (@(posedge clk) disable iff (rst) en_low_i);
-      
+    
   	// 5) Cover that  enh_conf_i signal is asserted.
 	cover_enh_conf_i: cover property (@(posedge clk) disable iff (rst) enh_conf_i);
 
-// ************************************************ funct_generator_lut *************************************/
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ funct_generator_lut ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━//
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
-	// 1) Assume that the a_i is stable during the clock cycle.
+
+///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 	
-     // 1) The property assures sin_temp has a valid value.
+	// 1) The property assures sin_temp has a valid value.
 	sin_temp_valid_data: assert property (@(posedge clk) disable iff (rst) !$isunknown(sin_temp)) $info("Assetion pass sin_temp_valid_data");
 	else $error(" Asserion failsin_temp_valid_data");
 
-      // 2) The property assures cos_temp has a valid value.
+      	// 2) The property assures cos_temp has a valid value.
 	cos_temp_valid_data: assert property (@(posedge clk) disable iff (rst) !$isunknown(cos_temp)) $info("Assetion pass cos_temp_valid_data");
-      else $error(" Asserion fail cos_temp_valid_data");
+      	else $error(" Asserion fail cos_temp_valid_data");
 
-      // 3) The property assures trian_temp has a valid value.
+      	// 3) The property assures trian_temp has a valid value.
 	trian_temp_valid_data: assert property (@(posedge clk) disable iff (rst) !$isunknown(trian_temp)) $info("Assetion pass trian_temp_valid_data");
 	else $error(" Asserion failtrian_temp_valid_data");
 
-      // 4) The property assures squa_temp has a valid value.
+	// 4) The property assures squa_temp has a valid value.
 	squa_temp_valid_data: assert property (@(posedge clk) disable iff (rst) !$isunknown(squa_temp)) $info("Assetion pass squa_temp_valid_data");
 	else $error(" Asserion fail squa_temp_valid_data");
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
    	
-      // 1) Covers when addr reaches max value.
-	//cover_sin_max_addr: cover property (@(posedge clk) disable iff (rst) addr == 2**ADDR_WIDTH - 1);
-	
+     	// 1) Covers when addr reaches max value.
+	cover_sin_max_addr: cover property (@(posedge clk) disable iff (rst) addr == ((2**`LUT_ADDR) - 1));
 
-
-// ************************************************ funct_generator_mux *************************************/
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ funct_generator_mux ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━//
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
@@ -506,8 +493,58 @@ module fv_generator(
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
-	// 1) The property assures when enh_gen_fsm is active the multiplication operation performs correcty.
+	// 1) The property assures data_select matches sin_temp when sel_i is 0 and enh is active.
+	data_select_is_sin_temp: assert property (@(posedge clk) ( sel_i == 2'b00) |-> data_select == sin_temp) $info("Assetion pass data_select_is_sin_temp");
+	else $error(" Asserion fail data_select_is_sin_temp");
 	
+	// 2) The property assures data_selectmatches cos_temp when sel_i is 1 and enh is active.
+	data_select_is_cos_temp: assert property (@(posedge clk) (sel_i == 2'b01) |-> data_select== cos_temp) $info("Assetion pass data_select_is_cos_temp");
+	else $error(" Asserion fail data_select_is_cos_temp");
+
+	// 3) The property assures data_select matches trian_temp when sel_i is 2 and enh is active.
+	data_select_is_trian_temp: assert property (@(posedge clk) (sel_i == 2'b10) |-> data_select == trian_temp) $info("Assetion pass data_select_is_trian_temp");
+	else $error(" Asserion fail data_select_is_trian_temp");
+
+	// 4) The property assures data_select matches squa_temp when sel_i is 3 and enh is active.
+	data_select_is_squa_temp: assert property (@(posedge clk) (sel_i == 2'b11) |-> data_select == squa_temp) $info("Assetion pass data_select_is_squa_temp");
+	else $error(" Asserion fail data_select_is_squa_temp");
+
+///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
+   	
+	// 1) Cover property for the multiplication scenario.
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ funct_generator_register ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━//
+
+///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
+
+	// 1) Assume that the a_i is stable during the clock cycle.
+	
+
+///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
+
+	// 1) The property assures that when rst is active, addr should be RESET_VALUE.
+  	when_rst_addr_is_reset_value: assert property (@(posedge clk) (!flag) |-> (addr == `RESET_VALUE)) $info("Assetion pass when_rst_addr_is_reset_value");
+	else $error(" Asserion fail when_rst_addr_is_reset_value");
+
+	// 2) The property assures that when enh_gen_fsm is active, addr should be equal to addr_temp.
+      	when_enh_gen_fsm_1_addr: assert property (@(posedge clk) enh_gen_fsm |=> (addr == $past(addr_temp))) $info("Assetion pass when_enh_gen_fsm_1_addr");
+	else $error(" Asserion fail when_enh_gen_fsm_1_addr");
+
+	// 3) The property assures that if enh_gen_fsm is not active, addr does not change.
+	enh_gen_fsm_0_addr_stable: assume property (@(posedge clk) disable iff (rst) (!enh_gen_fsm) |=> (addr == $past(addr))) $info("Assetion pass enh_gen_fsm_0_addr_stable");
+	else $error(" Asserion fail enh_gen_fsm_0_addr_stable");
+
+	// 4) The property assures that when rst is active, amp_reg should be RESET_AMP.
+  	when_rst_amp_reg_is_reset_amp: assert property (@(posedge clk) (!flag) |-> (amp_reg == `RESET_AMP)) $info("Assetion pass when_rst_amp_reg_is_reset_amp");
+	else $error(" Asserion fail when_rst_amp_reg_is_reset_amp");
+
+	// 5)The property assures that amp_reg holds the correct value based on en_config_amp.
+	when_en_config_amp_1_amp_reg : assert property (@(posedge clk) disable iff (rst) en_config_amp |=> (amp_reg == $past({amp_i, {(`DATA_WIDTH - `INT_BITS){1'b0}}}))) $info("Assetion pass when_en_config_amp_1_amp_reg");
+	else $error(" Asserion fail when_en_config_amp_1_amp_reg");
+
+	// 6)The property assures that if en_config_amp is not active, amp_reg does not change.
+	en_config_amp_0_amp_reg_stable: assume property (@(posedge clk) disable iff (rst) (!en_config_amp) |=> (amp_reg == $past(amp_reg))) $info("Assetion pass en_config_amp_0_amp_reg_stable");
+	else $error(" Asserion fail en_config_amp_0_amp_reg_stable");
 
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
@@ -515,6 +552,8 @@ module fv_generator(
 	// 1) Cover property for the multiplication scenario.
 	
 endmodule
+/*☆✼★☆✼★━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━★✼☆☆✼★｡
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
 bind funct_generator fv_generator fv_generator_inst(.*); 
 bind funct_generator_adder fv_funct_generator_adder fv_generator_adder_inst(.*);
