@@ -81,23 +81,23 @@ module fv_spi(
         //else $error("empty reset assertion failed at time %t", $time);
 
    // 3) Empty input is such a low active enable 
-   empty_enable_assert : assert property (@(posedge clk) disable iff (rst) ((empty) && (state_fv == IDLE)) |=> (state_fv == IDLE));
+   empty_IDLE_assert : assert property (@(posedge clk) disable iff (rst) ((empty) && (state_fv == IDLE)) |=> (state_fv == IDLE));
 	//$info("Empty enable assertiion passed");
 	//else $error("empty enable assertion failed at time %t", $time);
 
     // 4) Done output must be activated two clock cycles after bit counter is equal to zero 
-    done_after_bitcounter_zero_assert : assert property (@(posedge clk) disable iff (rst) ((bit_counter == '0) && (state_fv == SHIFT)) |-> ##2 (done));
+	done_after_bitcounter_zero_assert : assert property (@(posedge clk) disable iff (rst) ((bit_counter == '0) && (state_fv == SHIFT)) |=> (done));
         //$info("Done after bit counter = 0 assertiion passed");
         //else $error("Done after bit counter = 0 assertion failed at time %t", $time);
 
     // 5) Done output must to be activated one cycle after the COMPLETE state 
-    complete_state_then_done_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == COMPLETE) |=> (done));
+	complete_state_then_done_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == COMPLETE) |-> (done));
         //$info("Done after complete assertiion passed");
         //else $error("Done after complete assertion failed at time %t", $time);
     
     // 6) If done is activated, the state one clock cycle before must have been COMPLETE
-    done_only_after_load_assert : assert property (@(posedge clk) disable iff (rst) (done) |-> (($past(state_fv)) == COMPLETE));
-        //$info("Done after complete assertiion passed");
+    done_only_complete_state_assert : assert property (@(posedge clk) disable iff (rst) (done) |-> (state_fv == COMPLETE));
+	    //$info("Done in complete state assertiion passed");
         //else $error("Done after complete assertion failed at time %t", $time);
 
     // 7) Done output must remain assert for only 1 clock cycle since must be activated in the COMPLETE state and this state returns to IDLE in the next cycle without any condition.
@@ -176,12 +176,12 @@ module fv_spi(
         //else $error("State SHIFT to COMPLETE assertion failed at time %t", $time);
     
     // 22) read_en must be asserted one clock cycle after LOAD state 
-    load_state_then_read_en_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |=> (read_en) );
+	    load_state_then_read_en_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |-> (read_en) );
         //$info("load_state_then_read_en assertiion passed");
         //else $error("load_state_then_read_en assertion failed at time %t", $time);
 
     // 23) If read_en is activated, the state one clock cycle before must have been LOAD
-    read_en_only_after_load_assert : assert property (@(posedge clk) disable iff (rst) (read_en) |-> (($past(state_fv)) == LOAD) );
+    read_en_only_after_load_assert : assert property (@(posedge clk) disable iff (rst) (read_en) |-> (state_fv == LOAD) );
         //$info("read_en after LOAD assertiion passed");
         //else $error("read_en after LOAD assertion failed at time %t", $time);
 
@@ -191,7 +191,7 @@ module fv_spi(
         //else $error("read_en only one cycle assertion failed at time %t", $time);
 
     // 25) The value of read_data should be assing to shift_reg in the LOAD state
-     shift_reg_load_read_data_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |=> (shift_reg == read_data) );
+    shift_reg_load_read_data_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |-> (shift_reg == read_data) );
         //$info("shift_reg_load_read_data_assert assertiion passed");
         //else $error("shift_reg_load_read_data_assert assertion failed at time %t", $time);
 
@@ -216,7 +216,7 @@ module fv_spi(
         //else $error("clk_div toggle assertion failed at time %t", $time);
 
     // 30) sclk must to toggle when sclk_enable=1 and negedge of clk_div 
-    sclk_toggle_enable_assert : assert property (@(posedge clk) disable iff (rst) ((sclk_enable) && ($fell(clk_div))) |-> ##2 ($changed(sclk)));
+	    sclk_toggle_enable_assert : assert property (@(posedge clk) disable iff (rst) ((bit_counter != '0) && (sclk_enable) && ($fell(clk_div))) |-> ##2 ($changed(sclk)));
         //$info("sclk_toggle_enable assertion passed");
         //else $error("sclk_toggle_enable assertion failed at time %t", $time);
 
