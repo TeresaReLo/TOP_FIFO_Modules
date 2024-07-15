@@ -67,7 +67,7 @@ module spi_serializer #(
             			bit_counter <= '0;	
            			done <= 1'b0;
             			mosi <= 1'b0;
-            		sclk_enable <= 1'b0;
+            			sclk_enable <= 1'b0;
                 	end
                 	LOAD: begin
                     		shift_reg <= read_data;
