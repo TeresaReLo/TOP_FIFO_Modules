@@ -4,10 +4,10 @@ import fifo_defines_pkg::*;
 module fv_funct_generator_adder (
 	input  logic 	    		clrh,
 	input  logic 	    		enh,
-	input  logic [`LUT_ADDR-1:0]  data_a_i,
-	input  logic [`LUT_ADDR-1:0]  data_b_i,
+	input  logic [`LUT_ADDR-1:0]  	data_a_i,
+	input  logic [`LUT_ADDR-1:0]  	data_b_i,
 	input  logic [`LUT_ADDR-1:0] 	data_c_i,
-	input  logic [`LUT_ADDR-1:0]  data_o 
+	input  logic [`LUT_ADDR-1:0]	data_o 
 );
 	`define CLK_PATH fv_generator_inst.clk
 
@@ -23,7 +23,7 @@ module fv_funct_generator_adder (
 	clrh_on_data_o_zero: assert property (@(posedge `CLK_PATH) (clrh) |-> (data_o == '0)) $info("Assetion pass clrh_on_data_o_zero");
 	else $error(" Asserion fail clrh_on_data_o_zero");
 	
-	// 2) The property assures that when enh is 1 and clrh is 0 data_o is the sum of data_a_i, data_b_i, and data_c_i.
+	// 2) The property assures that when enh is 1 and clrh is 0 data_o is the sum of data_a_i, data_b_i, and data_c_i. //DATA_WIDTH change for LUT_ADDR
 	enh_on_data_o_increment: assert property (@(posedge `CLK_PATH) (enh && (!clrh)) |-> (data_o == (data_a_i + data_b_i + data_c_i))) $info("Assetion pass enh_on_data_o_increment");
  	else $error(" Asserion fail enh_on_data_o_increment");
 	
@@ -53,6 +53,7 @@ module fv_funct_generator_multi (
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
+	//1)
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
@@ -60,11 +61,7 @@ module fv_funct_generator_multi (
       	multiplication_correct: assert property (@(posedge `CLK_PATH) (enh) |-> (data_o == (a_i * b_i))) $info("Assetion pas smultiplication_correct");
 	else $error(" Asserion fail multiplication_correct");
       	
-  	//2) The property assures that after reset data_o will be assigned the value '0.
-      	/data_o_0_when_rst: assert property (@(posedge `CLK_PATH) ($rose(flag)) |-> data_o == '0) $info("Assetion pass data_temp_0_when_rst");
-	//else $error(" Asserion fail data_temp_0_when_rst");
-      	
-	// 3) The property assures that when enh is low the output data_o remains unchanged. //changing $past for $stable and |=> for |->
+	// 2) The property assures that when enh is low the output data_o remains unchanged. //changing $past for $stable and |=> for |->
       	data_o_stability_when_enh_0: assert property (@(posedge `CLK_PATH) (!enh) |-> ($stable(data_o))) $info("Assetion pass data_o_stability_when_enh_0");
 	else $error(" Asserion fail data_o_stability_when_enh_0");
 
@@ -114,7 +111,6 @@ module fv_funct_generator_fsm (
 
 	// 1) Assumption that the initial state is IDLE.
 	//initial_state_is_idle: assume property (@(posedge clk) disable iff (rst) (state == IDLE));
-
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 		
@@ -190,11 +186,9 @@ module fv_funct_generator_lut #(
 	input logic signed [DATA_WIDTH-1 : 0] 	read_data_o,
 	reg [DATA_WIDTH-1 : 0] lut_structure [2**ADDR_WIDTH-1:0]
 );
-
-	`define CLK_PATH fv_generator_inst.clk
 	`define RST_PATH fv_generator_inst.rst
 
-  	always @(posedge `CLK_PATH) begin
+  	always @(posedge clk) begin
       	if (`RST_PATH == 1'b1)
         	flag <= 1'b0;
       	else 
@@ -216,7 +210,7 @@ module fv_funct_generator_lut #(
 	read_addr_i_valid_range: assert property (@(posedge clk) read_addr_i < (2**ADDR_WIDTH)) $info("Assetion pass read_addr_i_valid_range");
 	else $error(" Asserion fail read_addr_i_valid_range");	
 	
-	// 3) The property assures that if read_addr_i request then the read_data_o should match the value stored in lut_structure at read_addr_i
+	// 3) The property assures that if read_addr_i request then the read_data_o should match the value stored in lut_structure at read_addr_i //changin read_addr_i for a flag to evaluate all the time after reset 
 	read_data_o_when_valid_read_addr_i: assert property (@(posedge clk) (flag) |=> (read_data_o == lut_structure[$past(read_addr_i)])) $info("Assetion pass read_data_o_when_valid_read_addr_i");
 	else $error(" Asserion fail read_data_o_when_valid_read_addr_i");
  
@@ -304,13 +298,12 @@ module fv_funct_generator_register(
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
-	// 1) Assumes that the input d is not unknown.
-	//assume property (@(posedge clk) !$isunknown(d));
+	// 1)
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
-	// 1) The property assures  that when rst is active, q should be RESET_VALUE.
- 	 when_rst_1_q_is_reset_value: assert property (@(posedge clk) (!flag) |-> (q == `RESET_VALUE)) $info("Assetion pass when_rst_1_q_is_reset_value");
+	// 1) The property assures  that when rst is active, q should be RESET_VALUE. //adding RESET_AMP for the amp_reg instance
+ 	 when_rst_1_q_is_reset_value: assert property (@(posedge clk) (!flag) |-> (q == `RESET_VALUE || `RESET_AMP)) $info("Assetion pass when_rst_1_q_is_reset_value");
 	else $error(" Asserion fail when_rst_1_q_is_reset_value");
 	
 	// 2) The property assures  that when clrh is active, q should be RESET_VALUE.
@@ -330,7 +323,7 @@ module fv_funct_generator_register(
 	// 1) Covers when rst happen.
 	cover_rst: cover property (@(posedge clk) $rose(flag));
 
-	// 2) Covers when clrh happen.
+	// 2) Covers when clrh happen. //clhr is always 0 at top level
 	cover_clrh: cover property (@(posedge clk)(clrh));
 
 	// 3) Covers when enh happen.
@@ -403,6 +396,7 @@ module fv_generator(
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
+	// 1) 
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
@@ -418,27 +412,28 @@ module fv_generator(
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ funct_generator_fsm ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━//
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
+	// 1) 
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 	
-      	// 1)The property assures that after rst enh_config_fsm is 0
+      	// 1)The property assures that after rst enh_config_fsm is 0. //changing |=> for |-> operator
       	enh_config_fsm_0_when_rst: assert property (@(posedge clk) disable iff (rst) ($rose(flag)) |->  enh_config_fsm == 1'b0) $info("Assetion pass enh_config_fsm_0_when_rst");
 	else $error(" Asserion fail enh_config_fsm_0_when_rst");
             
-   	// 2) The property assures that after rst enh_gen_fsm is 0
+   	// 2) The property assures that after rst enh_gen_fsm is 0. //changing |=> for |-> operator
       	enh_gen_fsm_0_when_rst: assert property (@(posedge clk) disable iff (rst) ($rose(flag)) |->  enh_gen_fsm == 1'b0) $info("Assetion pass enh_gen_fsm_0_when_rst");
       	else $error(" Asserion fail enh_gen_fsm_0_when_rst");
             
-	// 3) The property assures that after rst clrh_addr_fsm is 0
+	// 3) The property assures that after rst clrh_addr_fsm is 0.//changing |=> for |-> operator
         clrh_addr_fsm_0_when_rst: assert property (@(posedge clk) disable iff (rst) ($rose(flag)) |->  clrh_addr_fsm == 1'b0) $info("Assetion pass clrh_addr_fsm_0_when_rst");
 	else $error(" Asserion fail clrh_addr_fsm_0_when_rst");
       
- 	//  4) The property assures GEN to CONFI transition
+ 	//  4) The property assures GEN to CONFI transition.
 	assert_gen_to_confi: assert property (@(posedge clk) disable iff (rst) (enh_gen_fsm && enh_conf_i) |=> (enh_config_fsm)) $info("Assetion pass assert_gen_to_confi");
 	//else $error(" Asserion fail assert_gen_to_confi");
 
-	// 5) The property assures CONFI to GEN transition  // se agrego senal (!en_conf_i)
-  	assert_confi_to_gen: assert property (@(posedge clk) disable iff (rst) (enh_config_fsm && (!en_low_i) && (!en_conf_i) ) |=> (enh_gen_fsm)) $info("Assetion pass assert_confi_to_gen");
+	// 5) The property assures CONFI to GEN transition  // was added (!enh_conf_i) 
+  	assert_confi_to_gen: assert property (@(posedge clk) disable iff (rst) (enh_config_fsm && (!en_low_i) && (!enh_conf_i) ) |=> (enh_gen_fsm)) $info("Assetion pass assert_confi_to_gen");
 	else $error(" Asserion fail assert_confi_to_gen");
         
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
@@ -462,6 +457,7 @@ module fv_generator(
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
+	// 1) 
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 	
@@ -490,8 +486,7 @@ module fv_generator(
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
-	// 1) Assume that the a_i is stable during the clock cycle.
-	
+	// 1) 
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
@@ -513,14 +508,13 @@ module fv_generator(
 
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
    	
-	// 1) Cover property for the multiplication scenario.
+	// 1) 
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ funct_generator_register ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━//
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
-	// 1) Assume that the a_i is stable during the clock cycle.
-	
+	// 1) 
 
 ///////////////////////////////////////////////////// Assertions /////////////////////////////////////////////
 
@@ -551,7 +545,7 @@ module fv_generator(
  
 ///////////////////////////////////////////////////// Covers /////////////////////////////////////////////////////
    	
-	// 1) Cover property for the multiplication scenario.
+	// 1)
 	
 endmodule
 /*☆✼★☆✼★━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━★✼☆☆✼★｡
