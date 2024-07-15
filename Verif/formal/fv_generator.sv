@@ -185,6 +185,7 @@ module fv_funct_generator_lut #(
 	reg [DATA_WIDTH-1 : 0] lut_structure [2**ADDR_WIDTH-1:0]
 );
 	`define RST_PATH fv_generator_inst.rst
+	bit flag;
 
   	always @(posedge clk) begin
       	if (`RST_PATH == 1'b1)
