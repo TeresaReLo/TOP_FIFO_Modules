@@ -11,7 +11,6 @@ module fv_funct_generator_adder (
 );
 	`define CLK_PATH fv_generator_inst.clk
 
-
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
 	// 1) Assume enable and clear signals are not active simultaneously.
@@ -49,7 +48,6 @@ module fv_funct_generator_multi (
 	input logic signed [(`DATA_WIDTH*2)-1:0] data_o
 );
 	`define CLK_PATH fv_generator_inst.clk
- 
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
