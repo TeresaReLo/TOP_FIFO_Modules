@@ -80,10 +80,10 @@ module fv_spi(
         //$info("Empty reset assertiion passed");
         //else $error("empty reset assertion failed at time %t", $time);
 
-    // 3) Empty input must reset all the internal singals at the next clk posedge
-    //empty_reset_assert : assert property (@(posedge clk) disable iff (rst) (empty) |=> ( (shift_reg == '0) && (bit_counter == '0) && (sclk_enable == 1'b0) && (clk_div == 1'b0) && (state_fv == IDLE)));
-        //$info("Empty reset assertiion passed");
-        //else $error("empty reset assertion failed at time %t", $time);
+   // 3) Empty input is such a low active enable 
+   empty_enable_assert : assert property (@(posedge clk) disable iff (rst) ((empty) && (state_fv == IDLE)) |=> (state_fv == IDLE));
+	//$info("Empty enable assertiion passed");
+	//else $error("empty enable assertion failed at time %t", $time);
 
     // 4) Done output must be activated two clock cycles after bit counter is equal to zero 
     done_after_bitcounter_zero_assert : assert property (@(posedge clk) disable iff (rst) ((bit_counter == '0) && (state_fv == SHIFT)) |-> ##2 (done));
