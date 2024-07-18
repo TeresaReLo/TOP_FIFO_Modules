@@ -65,7 +65,7 @@ typedef enum logic [1:0] {IDLE, CONFI, GEN, XX='x} state_t; //For FSM states
      if(rst) begin
 	enh_config_fsm <= 1'b0;
 	enh_gen_fsm <= 1'b0;
-        clrh_addr_fsm <= 1'b0;
+        clrh_addr_fsm <= 1'b1;
      end
      else begin
 	//First default values
