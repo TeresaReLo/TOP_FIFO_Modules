@@ -25,8 +25,8 @@ module funct_generator #(
         parameter LUT_ADDR = 8,
         parameter RESET_VALUE=0,
         parameter RESET_AMP=32'h10000000,
-        parameter COS_FILE = "sin.txt",
-        parameter SIN_FILE = "cos.txt",
+        parameter COS_FILE = "cos.txt",
+        parameter SIN_FILE = "sin.txt",
         parameter TRIAN_FILE = "triangular.txt",
         parameter SQUA_FILE ="square.txt",
         localparam FIXED_POINT_BITS = (DATA_WIDTH - INT_BITS)
@@ -200,6 +200,6 @@ funct_generator_mux #(
 	.data_o(data_select)
 );
 
-assign wr_en_o = (enh_gen_fsm)? 1'b1 : 1'b0;
+assign wr_en_o = (rst)? 1'b0 : ((enh_gen_fsm && !en_low_i)? 1'b1 : 1'b0);
 
 endmodule
