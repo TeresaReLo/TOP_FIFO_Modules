@@ -13,7 +13,7 @@ module fv_funct_generator_adder (
 	`define RST_PATH fv_generator_inst.rst
 	bit flag;
 
-  	always @(posedge CLK_PATH) begin
+  	always @(posedge `CLK_PATH) begin
       	if (`RST_PATH == 1'b1)
         	flag <= 1'b0;
       	else 
@@ -60,7 +60,7 @@ module fv_funct_generator_multi (
 	`define RST_PATH fv_generator_inst.rst
 	bit flag;
 
-  	always @(posedge CLK_PATH) begin
+  	always @(posedge `CLK_PATH) begin
       	if (`RST_PATH == 1'b1)
         	flag <= 1'b0;
       	else 
