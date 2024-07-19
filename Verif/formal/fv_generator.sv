@@ -376,10 +376,10 @@ module fv_generator(
 	bit en_config_amp
      );
 	bit flag;
-   	reg [DATA_WIDTH-1:0] expected_sin [2**LUT_ADDR-1:0];
-    	reg [DATA_WIDTH-1:0] expected_cos [2**LUT_ADDR-1:0];
-    	reg [DATA_WIDTH-1:0] expected_trian [2**LUT_ADDR-1:0];
-    	reg [DATA_WIDTH-1:0] expected_squa [2**LUT_ADDR-1:0];
+   	reg [`DATA_WIDTH-1:0] expected_sin [2**`LUT_ADDR-1:0];
+    	reg [`DATA_WIDTH-1:0] expected_cos [2**`LUT_ADDR-1:0];
+    	reg [`DATA_WIDTH-1:0] expected_trian [2**`LUT_ADDR-1:0];
+    	reg [`DATA_WIDTH-1:0] expected_squa [2**`LUT_ADDR-1:0];
 
   	initial begin
         	$readmemh(SIN_FILE, expected_sin);
