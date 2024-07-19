@@ -284,4 +284,4 @@ module fv_spi(
     sclk_enable_cover : cover property (@(posedge clk) (sclk_enable));
 endmodule
 
-//bind spi_serializer fv_spi fv_spi_inst(.*); 
+bind spi_serializer fv_spi fv_spi_inst(.*); 
