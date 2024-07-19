@@ -252,10 +252,10 @@ module fv_spi(
     shift_reg_zero_bitcounter_zero_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == SHIFT) && (bit_counter == '0)) |-> (shift_reg == '0));
     
     // 35) When state is IDLE or COMPLETE shift_reg must to be stable
-    shift_reg_stable_idle_or_complet_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == IDLE) && (state_fv == COMPLETE)) |-> ($stable(shift_reg)));
+    shift_reg_stable_idle_or_complet_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == IDLE) || (state_fv == COMPLETE)) |-> ($stable(shift_reg)));
     
     // 36) Mosi signal must be equal to zero when state is IDLE or LOAD
-    mosi_zero_idle_load_states_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == IDLE) && (state_fv == LOAD)) |-> (mosi == 1'b0));
+    mosi_zero_idle_load_states_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == IDLE) || (state_fv == LOAD)) |-> (mosi == 1'b0));
     
     // 37) Data saved in shift_reg during LOAD state must be equal to the mosi sequence in SHIFT state
     read_data_equal_mosi_sequence_assert : assert property (@(posedge clk) disable iff (rst) (done) |-> (data_serial == data_read));
