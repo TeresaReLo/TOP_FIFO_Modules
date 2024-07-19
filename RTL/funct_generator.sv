@@ -82,7 +82,7 @@ funct_generator_fsm fsm(
 funct_generator_lut #(
     .DATA_WIDTH	(DATA_WIDTH),
     .ADDR_WIDTH	(LUT_ADDR),
-    .TXT_FILE	(SIN_FILE)
+    .TXT_FILE	(1)
 )
 LUT_sin(
     .clk	(clk    ),	
@@ -94,7 +94,7 @@ LUT_sin(
 funct_generator_lut #(
     .DATA_WIDTH	(DATA_WIDTH),
     .ADDR_WIDTH	(LUT_ADDR),
-    .TXT_FILE	(COS_FILE)
+    .TXT_FILE	(2)
 )
 LUT_cos(
     .clk	(clk    ),	
@@ -106,7 +106,7 @@ LUT_cos(
 funct_generator_lut #(
     .DATA_WIDTH	(DATA_WIDTH),
     .ADDR_WIDTH	(LUT_ADDR),
-    .TXT_FILE	(TRIAN_FILE)
+    .TXT_FILE	(3)
 )
 LUT_trian(
     .clk	(clk    ),	
@@ -118,7 +118,7 @@ LUT_trian(
 funct_generator_lut #(
     .DATA_WIDTH	(DATA_WIDTH),
     .ADDR_WIDTH	(LUT_ADDR),
-    .TXT_FILE	(SQUA_FILE)
+    .TXT_FILE	(4)
 )
 LUT_squa(
     .clk	(clk    ),	
