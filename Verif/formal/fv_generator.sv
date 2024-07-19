@@ -10,6 +10,15 @@ module fv_funct_generator_adder (
 	input  logic [`LUT_ADDR-1:0]	data_o 
 );
 	`define CLK_PATH fv_generator_inst.clk
+	`define RST_PATH fv_generator_inst.rst
+	bit flag;
+
+  	always @(posedge CLK_PATH) begin
+      	if (`RST_PATH == 1'b1)
+        	flag <= 1'b0;
+      	else 
+        	flag <=1'b1;
+  	end
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
