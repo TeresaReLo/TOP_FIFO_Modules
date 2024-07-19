@@ -10,6 +10,15 @@ module fv_funct_generator_adder (
 	input  logic [`LUT_ADDR-1:0]	data_o 
 );
 	`define CLK_PATH fv_generator_inst.clk
+	`define RST_PATH fv_generator_inst.rst
+	bit flag;
+
+  	always @(posedge `CLK_PATH) begin
+      	if (`RST_PATH == 1'b1)
+        	flag <= 1'b0;
+      	else 
+        	flag <=1'b1;
+  	end
 
 ///////////////////////////////////////////////////// Assumptions /////////////////////////////////////////////
 
@@ -51,7 +60,7 @@ module fv_funct_generator_multi (
 	`define RST_PATH fv_generator_inst.rst
 	bit flag;
 
-  	always @(posedge CLK_PATH) begin
+  	always @(posedge `CLK_PATH) begin
       	if (`RST_PATH == 1'b1)
         	flag <= 1'b0;
       	else 
@@ -367,10 +376,10 @@ module fv_generator(
 	bit en_config_amp
      );
 	bit flag;
-   	reg [DATA_WIDTH-1:0] expected_sin [2**LUT_ADDR-1:0];
-    	reg [DATA_WIDTH-1:0] expected_cos [2**LUT_ADDR-1:0];
-    	reg [DATA_WIDTH-1:0] expected_trian [2**LUT_ADDR-1:0];
-    	reg [DATA_WIDTH-1:0] expected_squa [2**LUT_ADDR-1:0];
+   	reg [`DATA_WIDTH-1:0] expected_sin [2**`LUT_ADDR-1:0];
+    	reg [`DATA_WIDTH-1:0] expected_cos [2**`LUT_ADDR-1:0];
+    	reg [`DATA_WIDTH-1:0] expected_trian [2**`LUT_ADDR-1:0];
+    	reg [`DATA_WIDTH-1:0] expected_squa [2**`LUT_ADDR-1:0];
 
   	initial begin
         	$readmemh(SIN_FILE, expected_sin);
