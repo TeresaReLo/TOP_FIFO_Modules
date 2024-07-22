@@ -309,4 +309,4 @@ module fv_spi(
 
 endmodule
 
-//bind spi_serializer fv_spi fv_spi_inst(.*); 
+bind spi_serializer fv_spi fv_spi_inst(.*); 
