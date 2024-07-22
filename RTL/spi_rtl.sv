@@ -13,8 +13,9 @@ module spi_serializer #(
     output logic                 done
 );
 
- typedef enum logic [1:0] {
+  typedef enum logic [2:0] {
         IDLE,
+   	READ_EN,
         LOAD,
         SHIFT,
         COMPLETE
@@ -51,31 +52,34 @@ module spi_serializer #(
   	end 
  
 	always_ff @(posedge clk or posedge rst) begin  
- 		if (rst) begin
-        		shift_reg <= '0;
-        		bit_counter <= '0;
-        		done <= 1'b0;
-            		mosi <= 1'b0;
-            		sclk_enable <= 1'b0;
-                	read_en <= 1'b0;
-        		end else begin
-                	read_en <= 1'b0;
-            		
-			case (next_state)
-              		IDLE: begin
-				shift_reg <= '0;
-            			bit_counter <= '0;	
-           			done <= 1'b0;
+ 			if (rst) begin
+        			shift_reg <= '0;
+        			bit_counter <= '0;
+        			done <= 1'b0;
             			mosi <= 1'b0;
             			sclk_enable <= 1'b0;
+                		read_en <= 1'b0;
+
+        		end else begin
+                		read_en <= 1'b0;
+
+			case (state)
+              		IDLE: begin
+					shift_reg <= '0;
+            		bit_counter <= '0;	
+           			done <= 1'b0;
+            		mosi <= 1'b0;
+            		sclk_enable <= 1'b0;
                 	end
-                	LOAD: begin
-                    		shift_reg <= read_data;
+              		READ_EN: begin
                     		read_en <= 1'b1;
+                    	end
+                	LOAD: begin
+                     		shift_reg <= read_data;
                     		bit_counter <= DATAWIDTH;
-                	end
+                     		sclk_enable <= 1'b1;  // Enable sclk during SHIFT state
+                    	end     
                 	SHIFT: begin
-                   		sclk_enable <= 1'b1;  // Enable sclk during SHIFT state
               			if (sclk && clk_div) begin //Shift data on the - edge
 					mosi <= shift_reg[DATAWIDTH-1];
                         		shift_reg <= shift_reg << 1; //1 Shift Left
@@ -95,8 +99,11 @@ module spi_serializer #(
         	case (state)
             	IDLE: begin //00
                 	if (empty) next_state = IDLE;
-              		else if ((full || !empty)&& !done) next_state = LOAD;  //start when full or not empty and done is not active.
+                  	else if ((full || !empty)&& !done) next_state = READ_EN;  //start when full or not empty and done is not active.
             	end
+              	READ_EN: begin
+                  	next_state = LOAD;
+                end
             	LOAD: begin //01
               		next_state = SHIFT;
             	end
