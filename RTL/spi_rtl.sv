@@ -52,22 +52,22 @@ module spi_serializer #(
   	end 
  
 	always_ff @(posedge clk or posedge rst) begin  
- 			if (rst) begin
-        			shift_reg <= '0;
-        			bit_counter <= '0;
-        			done <= 1'b0;
-            			mosi <= 1'b0;
-            			sclk_enable <= 1'b0;
-                		read_en <= 1'b0;
+ 		if (rst) begin
+        		shift_reg <= '0;
+        		bit_counter <= '0;
+        		done <= 1'b0;
+            		mosi <= 1'b0;
+            		sclk_enable <= 1'b0;
+                	read_en <= 1'b0;
 
-        		end else begin
-                		read_en <= 1'b0;
+        	end else begin
+                	read_en <= 1'b0;
 
 			case (state)
               		IDLE: begin
-					shift_reg <= '0;
+			shift_reg <= '0;
             		bit_counter <= '0;	
-           			done <= 1'b0;
+           		done <= 1'b0;
             		mosi <= 1'b0;
             		sclk_enable <= 1'b0;
                 	end
