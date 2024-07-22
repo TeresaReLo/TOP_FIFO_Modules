@@ -383,7 +383,7 @@ module fv_generator(
 		//$readmemh(TXT_FILE, lut_structure);
 
                 //sine
-                if(TXT_FILE == 1) begin
+                //if(TXT_FILE == 1) begin
 
 expected_sin[0]   = 32'h00000000;
 expected_sin[1]   = 32'h00645A1C;
@@ -642,9 +642,9 @@ expected_sin[253] = 32'hFED288CF;
 expected_sin[254] = 32'hFF36E2EC;
 expected_sin[255] = 32'hFF9BA5E4;
     
-                end
+                //end
                 //cosine
-                else if(TXT_FILE == 2) begin
+                //else if(TXT_FILE == 2) begin
 
 expected_cos[0] = 32'h10000000;
 expected_cos[1] = 32'h0FFEC56D;
@@ -903,9 +903,9 @@ expected_cos[253] = 32'h0FF4F0D8;
 expected_cos[254] = 32'h0FFB15B5;
 expected_cos[255] = 32'h0FFEC56D;
                   
-      	          end
+      	          //end
                 //trian
-                else if(TXT_FILE == 3) begin 
+                //else if(TXT_FILE == 3) begin 
 
 expected_trian[0]   = 32'h00000000;
 expected_trian[1]   = 32'h003FE5C9;
@@ -1163,10 +1163,10 @@ expected_trian[252] = 32'hFF000000;
 expected_trian[253] = 32'hFF3FE5CA;
 expected_trian[254] = 32'hFF80346E;
 expected_trian[255] = 32'hFFC01A37; 
-                end  
+               // end  
                         
                 //squa
-                else if(TXT_FILE == 4) begin 
+               // else if(TXT_FILE == 4) begin 
  expected_squa[0]   = 32'h10000000;
 expected_squa[1]   = 32'h10000000;
 expected_squa[2]   = 32'h10000000;
@@ -1424,7 +1424,7 @@ expected_squa[253] = 32'hF0000000;
 expected_squa[254] = 32'hF0000000;
 expected_squa[255] = 32'hF0000000;
 
-                end
+                //end
 end
 
 	always @(posedge clk) begin
