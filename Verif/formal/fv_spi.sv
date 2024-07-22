@@ -140,7 +140,7 @@ module fv_spi(
         //$info("State after LOAD assertiion passed");
         //else $error("State after LOAD assertion failed at time %t", $time);
 
-    // 12) If a LOAD state ocurrs, an IDLE state must have happened one clock cycle before
+    // 12) If a LOAD state ocurrs, an READ_EN state must have happened one clock cycle before
     state_before_load_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |-> (($past(state_fv)) == READ_EN));
         //$info("State before LOAD assertiion passed");
         //else $error("State before LOAD assertion failed at time %t", $time);
@@ -261,6 +261,22 @@ module fv_spi(
     
     // 37) Data saved in shift_reg during LOAD state must be equal to the mosi sequence in SHIFT state*******************************
     read_data_equal_mosi_sequence_assert : assert property (@(posedge clk) disable iff (rst) (done) |-> (data_serial == data_read));
+
+    // 38) READ_EN state must only last for one clock cycle and must always go to the LOAD state.
+    state_after_readen_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == READ_EN) |=> (state_fv == LOAD));
+        //$info("State after LOAD assertiion passed");
+        //else $error("State after LOAD assertion failed at time %t", $time);
+
+    // 39) If a LOAD state ocurrs, an IDLE state must have happened one clock cycle before
+    state_before_readen_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == READ_EN) |-> (($past(state_fv)) == IDLE));
+        //$info("State before LOAD assertiion passed");
+        //else $error("State before LOAD assertion failed at time %t", $time);
+
+    // 40) This property verifies that next_state signal have the correct value in the LOAD state
+    next_state_readen_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == READ_EN) |-> (next_state_fv == LOAD));
+        //$info("Next state LOAD assertiion passed");
+        //else $error("Next state LOAD assertion failed at time %t", $time);
+
 
     /*************************************************************************** cover ***************************************************************************/
     
