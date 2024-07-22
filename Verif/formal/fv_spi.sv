@@ -27,11 +27,11 @@ module fv_spi(
     logic [`BIT_COUNTER_WIDTH:0] bit_counter,
     logic clk_div,
     logic sclk_enable,
-    logic [1:0] state,
-    logic [1:0] next_state
+    logic [2:0] state,
+    logic [2:0] next_state
      );
 
-    typedef enum logic [1:0] {IDLE, LOAD, SHIFT, COMPLETE} state_type;
+    typedef enum logic [2:0] {IDLE, READ_EN, LOAD, SHIFT, COMPLETE} state_type;
     state_type state_fv, next_state_fv;
     bit flag_t1;
     bit [`DATA_WIDTH-1:0] data_read, data_serial;
@@ -46,7 +46,7 @@ module fv_spi(
         if(rst) data_serial = '0;
         else 
         if ((state_fv == SHIFT) && (!sclk) && (!clk_div)) data_serial[bit_counter] = mosi;
-        else if(state_fv == IDLE) data_serial = '0;
+        else if(state_fv == READ_EN) data_serial = '0;
     end
 
     always_comb begin
@@ -57,18 +57,20 @@ module fv_spi(
     always_comb begin
         case(state) 
             0: state_fv = IDLE;
-            1: state_fv = LOAD;
-            2: state_fv = SHIFT;
-            3: state_fv = COMPLETE;
+            1: state_fv = READ_EN;
+            2: state_fv = LOAD;
+            3: state_fv = SHIFT;
+            4: state_fv = COMPLETE;
         endcase
     end
 
     always_comb begin
         case(next_state) 
             0: next_state_fv = IDLE;
-            1: next_state_fv = LOAD;
-            2: next_state_fv = SHIFT;
-            3: next_state_fv = COMPLETE;
+            1: next_state_fv = READ_EN;
+            2: next_state_fv = LOAD;
+            3: next_state_fv = SHIFT;
+            4: next_state_fv = COMPLETE;
         endcase
     end
     //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,17 +101,17 @@ module fv_spi(
 	//else $error("empty enable assertion failed at time %t", $time);
 
     // 4) Done output must be activated two clock cycles after bit counter is equal to zero 
-    done_after_bitcounter_zero_assert : assert property (@(posedge clk) disable iff (rst) ((bit_counter == '0) && (state_fv == SHIFT)) |=> (done));
+    done_after_bitcounter_zero_assert : assert property (@(posedge clk) disable iff (rst) ((bit_counter == '0) && (state_fv == SHIFT)) |-> ##2 (done));
         //$info("Done after bit counter = 0 assertiion passed");
         //else $error("Done after bit counter = 0 assertion failed at time %t", $time);
 
     // 5) Done output must to be activated one cycle after the COMPLETE state 
-    complete_state_then_done_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == COMPLETE) |-> (done));
+    complete_state_then_done_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == COMPLETE) |=> (done));
         //$info("Done after complete assertiion passed");
         //else $error("Done after complete assertion failed at time %t", $time);
     
     // 6) If done is activated, the state one clock cycle before must have been COMPLETE
-    done_only_complete_state_assert : assert property (@(posedge clk) disable iff (rst) (done) |-> (state_fv == COMPLETE));
+    done_only_complete_state_assert : assert property (@(posedge clk) disable iff (rst) (done) |-> (($past(state_fv) == COMPLETE)));
 	//$info("Done in complete state assertiion passed");
         //else $error("Done after complete assertion failed at time %t", $time);
 
@@ -118,18 +120,18 @@ module fv_spi(
         //$info("Done only one cycle assertiion passed");
         //else $error("Done only one cycle assertion failed at time %t", $time);
 
-    // 8) IDLE state can only change to LOAD state or remain in IDLE state 
-    state_after_idle_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == IDLE) |=> ( (state_fv == IDLE) || (state_fv == LOAD) ));
+    // 8) IDLE state can only change to READ_EN state or remain in IDLE state 
+    state_after_idle_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == IDLE) |=> ( (state_fv == IDLE) || (state_fv == READ_EN) ));
         //$info("State after IDLE assertiion passed");
         //else $error("State after IDLE assertion failed at time %t", $time);
 
     // 9) If an IDLE state ocurrs, a COMPLETE state or IDLE state or an empty or a reset must have happened one clock cycle before 
-    state_before_idle_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == IDLE) |-> ( (($past(state_fv)) == IDLE) || (($past(state_fv)) == COMPLETE) || (empty) || (!flag_t1)));
+    state_before_idle_assert : assert property (@(posedge clk) disable iff (rst) ((flag_t1) && (state_fv == IDLE)) |-> ( (($past(state_fv)) == IDLE) || (($past(state_fv)) == COMPLETE) ));
         //$info("State before IDLE assertiion passed");
         //else $error("State before IDLE assertion failed at time %t", $time);
     
     // 10) This property verifies that next_state signal have the correct value in the IDLE state
-    next_state_idle_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == IDLE) |-> ( (next_state_fv == IDLE) || (next_state_fv == LOAD) ));
+    next_state_idle_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == IDLE) |-> ( (next_state_fv == IDLE) || (next_state_fv == READ_EN) ));
         //$info("Next state IDLE assertiion passed");
         //else $error("Next state IDLE assertion failed at time %t", $time);
     
@@ -139,7 +141,7 @@ module fv_spi(
         //else $error("State after LOAD assertion failed at time %t", $time);
 
     // 12) If a LOAD state ocurrs, an IDLE state must have happened one clock cycle before
-    state_before_load_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |-> (($past(state_fv)) == IDLE));
+    state_before_load_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |-> (($past(state_fv)) == READ_EN));
         //$info("State before LOAD assertiion passed");
         //else $error("State before LOAD assertion failed at time %t", $time);
 
@@ -178,8 +180,8 @@ module fv_spi(
         //$info("Next state COMPLETE assertiion passed");
         //else $error("Next state COMPLETE assertion failed at time %t", $time);
 
-    // 20) When the state change condition is met, the state goes from IDLE to LOAD
-    state_idle_next_condition_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == IDLE) && (full || (!empty)) && (!done)) |=> (state_fv == LOAD) );
+    // 20) When the state change condition is met, the state goes from IDLE to LOAD****************************************************
+    state_idle_next_condition_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == IDLE) && (full || (!empty)) && (!done)) |=> (state_fv == READ_EN) );
         //$info("State IDLE to LOAD assertiion passed");
         //else $error("State IDLE to LOAD assertion failed at time %t", $time);
 
@@ -188,13 +190,13 @@ module fv_spi(
         //$info("State SHIFT to COMPLETE assertiion passed");
         //else $error("State SHIFT to COMPLETE assertion failed at time %t", $time);
     
-    // 22) read_en must be asserted one clock cycle after LOAD state 
-    load_state_then_read_en_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |-> (read_en) );
+    // 22) read_en must be asserted one clock cycle after READ_EN state 
+    readen_state_then_read_en_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == READ_EN) |=> (read_en) );
         //$info("load_state_then_read_en assertiion passed");
         //else $error("load_state_then_read_en assertion failed at time %t", $time);
 
-    // 23) If read_en is activated, the state one clock cycle before must have been LOAD
-    read_en_only_after_load_assert : assert property (@(posedge clk) disable iff (rst) (read_en) |-> (state_fv == LOAD) );
+    // 23) If read_en is activated, the state one clock cycle before must have been READ_EN
+    read_en_only_after_load_assert : assert property (@(posedge clk) disable iff (rst) (read_en) |-> ($past(state_fv == READ_EN)) );
         //$info("read_en after LOAD assertiion passed");
         //else $error("read_en after LOAD assertion failed at time %t", $time);
 
@@ -204,7 +206,7 @@ module fv_spi(
         //else $error("read_en only one cycle assertion failed at time %t", $time);
 
     // 25) The value of read_data should be assing to shift_reg in the LOAD state
-    shift_reg_load_read_data_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |-> (shift_reg == read_data) );
+    shift_reg_load_read_data_assert : assert property (@(posedge clk) disable iff (rst) (state_fv == LOAD) |=> (shift_reg == read_data) );
         //$info("shift_reg_load_read_data_assert assertiion passed");
         //else $error("shift_reg_load_read_data_assert assertion failed at time %t", $time);
 
@@ -214,7 +216,7 @@ module fv_spi(
         //else $error("sclk_enable_shift_state assertion failed at time %t", $time);
 
     // 27) If sclk_enable is activated, the state one clock cycle before must have been SHIFT
-    sclk_enable_only_shift_assert : assert property (@(posedge clk) disable iff (rst) (sclk_enable) |-> (state_fv == SHIFT));
+    sclk_enable_only_shift_assert : assert property (@(posedge clk) disable iff (rst) (sclk_enable) |-> (($past(state_fv == SHIFT)) || ($past(state_fv == LOAD))) );
         //$info("sclk_enable_shift_state assertiion passed");
         //else $error("sclk_enable_shift_state assertion failed at time %t", $time);
 
@@ -252,12 +254,12 @@ module fv_spi(
     shift_reg_zero_bitcounter_zero_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == SHIFT) && (bit_counter == '0)) |-> (shift_reg == '0));
     
     // 35) When state is IDLE or COMPLETE shift_reg must to be stable
-    shift_reg_stable_idle_or_complet_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == IDLE) || (state_fv == COMPLETE)) |-> ($stable(shift_reg)));
+    shift_reg_stable_idle_or_complet_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == IDLE) || (state_fv == COMPLETE) || (state_fv == READ_EN)) |-> ($stable(shift_reg)));
     
-    // 36) Mosi signal must be equal to zero when state is IDLE or LOAD
-    mosi_zero_idle_load_states_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == IDLE) || (state_fv == LOAD)) |-> (mosi == 1'b0));
+    // 36) Mosi signal must be equal to zero when state is IDLE or LOAD*****************************************************
+    mosi_zero_idle_load_states_assert : assert property (@(posedge clk) disable iff (rst) ((state_fv == IDLE) || (state_fv == LOAD) || (state_fv == READ_EN)) |=> (mosi == 1'b0));
     
-    // 37) Data saved in shift_reg during LOAD state must be equal to the mosi sequence in SHIFT state
+    // 37) Data saved in shift_reg during LOAD state must be equal to the mosi sequence in SHIFT state*******************************
     read_data_equal_mosi_sequence_assert : assert property (@(posedge clk) disable iff (rst) (done) |-> (data_serial == data_read));
 
     /*************************************************************************** cover ***************************************************************************/
@@ -282,6 +284,13 @@ module fv_spi(
 
     // 7) sclk_enable was asserted
     sclk_enable_cover : cover property (@(posedge clk) (sclk_enable));
+
+    // 8) empty signal was asserted
+    empty_signal_cover : cover property (@(posedge clk) (empty));
+    
+    // 9) full signal was asserted
+    full_signal_cover : cover property (@(posedge clk) (full));
+
 endmodule
 
-bind spi_serializer fv_spi fv_spi_inst(.*); 
+//bind spi_serializer fv_spi fv_spi_inst(.*); 
