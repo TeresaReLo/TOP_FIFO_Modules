@@ -343,7 +343,7 @@ module fv_funct_generator_register(
 	cover_rst: cover property (@(posedge clk) $rose(flag));
 
 	// 2) Covers when clrh happen. //clhr is always 0 at top level
-	cover_clrh: cover property (@(posedge clk)(clrh));
+	cover_clrh: cover property (@(posedge clk)(!clrh));
 
 	// 3) Covers when enh happen.
 	cover_enh: cover property (@(posedge clk) (enh));
