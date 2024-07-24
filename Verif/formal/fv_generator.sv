@@ -378,7 +378,7 @@ module fv_generator(
     	reg [`DATA_WIDTH-1:0] expected_cos [2**`LUT_ADDR-1:0];
     	reg [`DATA_WIDTH-1:0] expected_trian [2**`LUT_ADDR-1:0];
     	reg [`DATA_WIDTH-1:0] expected_squa [2**`LUT_ADDR-1:0];
-
+/*
 	initial begin  //load hexadecimal data in txt
 		//$readmemh(TXT_FILE, lut_structure);
 
@@ -1426,7 +1426,7 @@ expected_squa[255] = 32'hF0000000;
 
                 //end
 end
-
+*/
 	always @(posedge clk) begin
       		if (rst == 1'b1)
         		flag <= 1'b0;
